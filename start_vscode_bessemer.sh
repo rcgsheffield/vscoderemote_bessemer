@@ -46,8 +46,8 @@ VSC_NUM_CPU=1
 # Runtime limit default         : 1:00 hour
 VSC_RUN_TIME="01:00:00"
 
-# Memory default                : 1024 MB per core
-VSC_MEM_PER_CPU_CORE=1024
+# Memory default                : 2 GB per job
+VSC_MEM_PER_JOB=2
 
 # Number of GPUs default        : 0 GPUs
 VSC_NUM_GPU=0
@@ -73,7 +73,7 @@ Options:
         -u | --username       USERNAME         TUoS username for SSH connection to Bessemer
         -n | --numcores       NUM_CPU          Number of CPU cores to be used on the cluster
         -W | --runtime        RUN_TIME         Run time limit for the code-server in hours and minutes HH:MM
-        -m | --memory         MEM_PER_CORE     Memory limit in MB per core
+        -m | --memory         MEM_PER_JOB      Memory limit in GB per job. (RAM) Ex. 4 cores *4G = 16 
 
 Optional arguments:
 
@@ -86,9 +86,9 @@ Optional arguments:
 
 Examples:
 
-        ./start_vscode.sh -u te1st -n 4 -W 04:00:00 -m 2048
+        ./start_vscode.sh -u te1st -n 4 -W 04:00:00 -m 2
 
-        ./start_vscode.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 2048
+        ./start_vscode.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 2
 
         ./start_vscode.sh -c $HOME/.vsc_config
 
@@ -98,7 +98,7 @@ VSC_USERNAME=""             # TUoS username for SSH connection to Bessemer
 VSC_NUM_CPU=1               # Number of CPU cores to be used on the cluster
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
-VSC_MEM_PER_CPU_CORE=1024   # Memory limit in MB per core
+VSC_MEM_PER_JOB=2           # Memory limit in GB per job. (RAM) Ex. 4 cores *4G = 16
 VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
 VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 
@@ -136,7 +136,7 @@ do
                 shift
                 ;;
                 -m|--memory)
-                VSC_MEM_PER_CPU_CORE=$2
+                VSC_MEM_PER_JOB=$2
                 shift
                 shift
                 ;;
@@ -198,7 +198,7 @@ fi
 
 # check if VSC_NUM_CPU is <= 40
 if [ "$VSC_NUM_CPU" -gt "40" ]; then
-        echo -e "Error: $VSC_NUM_CPU -> Larger than 40. No distributed memory supported, therefore the number of CPU cores needs to be smaller or equal to 16\n"
+        echo -e "Error: $VSC_NUM_CPU -> Larger than 40. No distributed memory supported, therefore the number of CPU cores needs to be smaller or equal to 40\n"
         display_help
 fi
 
@@ -240,12 +240,12 @@ else
     echo -e "Run time limit set to $VSC_RUN_TIME"
 fi
 
-# check if VSC_MEM_PER_CPU_CORE is an integer
-if ! [[ "$VSC_MEM_PER_CPU_CORE" =~ ^[0-9]+$ ]]; then
-        echo -e "Error: $VSC_MEM_PER_CPU_CORE -> Memory limit must be an integer, please try again\n"
+# check if VSC_MEM_PER_JOB is an integer
+if ! [[ "$VSC_MEM_PER_JOB" =~ ^[0-9]+$ ]]; then
+        echo -e "Error: $VSC_MEM_PER_JOB -> Memory limit must be an integer, please try again\n"
         display_help
 else
-    echo -e "Memory per core set to $VSC_MEM_PER_CPU_CORE MB"
+    echo -e "Memory per job set to $VSC_MEM_PER_JOB GB"
 fi
 
 # check if VSC_WAITING_INTERVAL is an integer
@@ -332,9 +332,9 @@ echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
 echo -e "============================================================================================"
-echo -e "ssh ${VSC_SSH_OPT} qsub -V -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU}"
+echo -e "ssh ${VSC_SSH_OPT} sbatch -V -pe smp ${VSC_NUM_CPU} -t=${VSC_RUN_TIME} -mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU}"
 echo -e "============================================================================================\n"
-ssh ${VSC_SSH_OPT} qsub -N VSCodeServer -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU} <<ENDSRUN
+ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer -pe smp ${VSC_NUM_CPU} -t=${VSC_RUN_TIME} -mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU} <<ENDSBATCH
 source \${HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
@@ -345,7 +345,7 @@ echo "Remote IP:\$VSC_IP_REMOTE" > /home/$VSC_USERNAME/vscip
 echo "Remote PORT:\$VSC_PORT_REMOTE" > /home/$VSC_USERNAME/vscport
 echo "Remote JOB ID:\$JOB_ID" > /home/$VSC_USERNAME/vscjid
 code-server --cert ~/.ssl/vscoderemote/vscode_remote_ssl-server-cert.pem --cert-key ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem --bind-addr=\${VSC_IP_REMOTE}:\${VSC_PORT_REMOTE}
-ENDSRUN
+ENDSBATCH
 
 # wait until batch job has started, poll every $VSC_WAITING_INTERVAL seconds to check if /cluster/home/$VSC_USERNAME/vscip exists
 # once the file exists and is not empty the batch job has started
