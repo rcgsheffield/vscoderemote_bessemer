@@ -98,7 +98,7 @@ Now you should generate your SSL certificates (these secure the communications b
 Download the repository with the command
 
 ```
-git clone git@github.com:jkwmoore/vscoderemote_sharc.git
+git clone git@github.com:rcgsheffield/vscoderemote_sheffield_hpc.git
 ```
 
 ### Starting VSCode Remote server using a batch job
@@ -162,3 +162,4 @@ Please note that when you finish working with the code-server, you need to termi
 * Andreas Lugmayr
 * James Moore
 * Nicholas Musembi
+* Carl Kennedy
