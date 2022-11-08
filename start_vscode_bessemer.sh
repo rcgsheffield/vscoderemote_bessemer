@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#  Script to run on a local computer to start a code-server on ShARC and      #
+#  Script to run on a local computer to start a code-server on Bessemer and      #
 #  connect it with a local browser to it                                      #
 #                                                                             #
 #  Main author    : Samuel Fux                                                #
@@ -27,7 +27,7 @@ VSC_VERSION="0.1"
 VSC_SCRIPTDIR=$(pwd)
 
 # hostname of the cluster to connect to
-VSC_HOSTNAME="sharc.shef.ac.uk"
+VSC_HOSTNAME="bessemer.shef.ac.uk"
 
 # order for initializing configuration options
 # 1. Defaults values set inside this script
@@ -64,13 +64,13 @@ VSC_SSH_KEY_PATH=""
 
 function display_help {
 cat <<-EOF
-$0: Script to start a VSCode remote server on ShARC from a local computer
+$0: Script to start a VSCode remote server on Bessemer from a local computer
 
 Usage: start_vscode.sh [options]
 
 Options:
 
-        -u | --username       USERNAME         TUoS username for SSH connection to ShARC
+        -u | --username       USERNAME         TUoS username for SSH connection to Bessemer
         -n | --numcores       NUM_CPU          Number of CPU cores to be used on the cluster
         -W | --runtime        RUN_TIME         Run time limit for the code-server in hours and minutes HH:MM
         -m | --memory         MEM_PER_CORE     Memory limit in MB per core
@@ -94,7 +94,7 @@ Examples:
 
 Format of configuration file:
 
-VSC_USERNAME=""             # TUoS username for SSH connection to ShARC
+VSC_USERNAME=""             # TUoS username for SSH connection to Bessemer
 VSC_NUM_CPU=1               # Number of CPU cores to be used on the cluster
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
@@ -196,9 +196,9 @@ if ! [[ "$VSC_NUM_CPU" =~ ^[0-9]+$ ]]; then
         display_help
 fi
 
-# check if VSC_NUM_CPU is <= 16
-if [ "$VSC_NUM_CPU" -gt "16" ]; then
-        echo -e "Error: $VSC_NUM_CPU -> Larger than 16. No distributed memory supported, therefore the number of CPU cores needs to be smaller or equal to 16\n"
+# check if VSC_NUM_CPU is <= 40
+if [ "$VSC_NUM_CPU" -gt "40" ]; then
+        echo -e "Error: $VSC_NUM_CPU -> Larger than 40. No distributed memory supported, therefore the number of CPU cores needs to be smaller or equal to 16\n"
         display_help
 fi
 
@@ -214,8 +214,8 @@ if ! [[ "$VSC_NUM_GPU" =~ ^[0-9]+$ ]]; then
         display_help
 fi
 
-# check if VSC_NUM_GPU is <= 7
-if [ "$VSC_NUM_GPU" -gt "7" ]; then
+# check if VSC_NUM_GPU is <= 4
+if [ "$VSC_NUM_GPU" -gt "4" ]; then
         echo -e "Error: No distributed memory supported, therefore number of GPUs needs to be smaller or equal to 7\n"
         display_help
 fi
@@ -327,14 +327,14 @@ VSCPASS=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 30 | tr -d '\n'
 # This is being done this way for reasons.
 ssh -T $VSC_SSH_OPT "sed -i '/^password:/d' ~/.config/code-server/config.yaml && echo 'password: $VSCPASS' > ~/.config/code-server/config.yaml"
 
-# run the code-server job on ShARC and save the ip of the compute node in the file vscip in the home directory of the user on ShARC
+# run the code-server job on Bessemer and save the ip of the compute node in the file vscip in the home directory of the user on Bessemer
 echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
 echo -e "============================================================================================"
 echo -e "ssh ${VSC_SSH_OPT} qsub -V -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU}"
 echo -e "============================================================================================\n"
-ssh ${VSC_SSH_OPT} qsub -N VSCodeServer -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU} <<ENDQSUB
+ssh ${VSC_SSH_OPT} qsub -N VSCodeServer -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU} <<ENDSRUN
 source \${HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
@@ -345,7 +345,7 @@ echo "Remote IP:\$VSC_IP_REMOTE" > /home/$VSC_USERNAME/vscip
 echo "Remote PORT:\$VSC_PORT_REMOTE" > /home/$VSC_USERNAME/vscport
 echo "Remote JOB ID:\$JOB_ID" > /home/$VSC_USERNAME/vscjid
 code-server --cert ~/.ssl/vscoderemote/vscode_remote_ssl-server-cert.pem --cert-key ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem --bind-addr=\${VSC_IP_REMOTE}:\${VSC_PORT_REMOTE}
-ENDQSUB
+ENDSRUN
 
 # wait until batch job has started, poll every $VSC_WAITING_INTERVAL seconds to check if /cluster/home/$VSC_USERNAME/vscip exists
 # once the file exists and is not empty the batch job has started
@@ -360,7 +360,7 @@ ENDSSH
 # give the code-server a few seconds to start
 sleep 7
 
-# get remote ip, port and token from files stored on ShARC
+# get remote ip, port and token from files stored on Bessemer
 echo -e "Receiving ip, port and token from the code-server"
 VSC_REMOTE_IP=$(ssh $VSC_SSH_OPT "cat /home/$VSC_USERNAME/vscip | grep -m1 'Remote IP' | cut -d ':' -f 2")
 VSC_REMOTE_PORT=$(ssh $VSC_SSH_OPT "cat /home/$VSC_USERNAME/vscport | grep -m1 'Remote PORT' | cut -d ':' -f 2")
@@ -454,6 +454,6 @@ read -p "Please press enter to end the session, disconnect the SSH tunnel and te
 # Kill the tunnel
 kill $SSH_TUNNEL_PID
 
-# Terminate the job on ShARC and remove the vscjid file.
+# Terminate the job on Bessemer and remove the vscjid file.
 ssh -T $VSC_SSH_OPT "qdel $VSC_REMOTE_JID && rm /home/$VSC_USERNAME/vscjid /home/$VSC_USERNAME/vscip /home/$VSC_USERNAME/vscport"
 exit
