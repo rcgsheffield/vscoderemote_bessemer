@@ -40,8 +40,8 @@ VSC_CONFIG_FILE="$HOME/.vsc_config"
 # Username default              : no default
 VSC_USERNAME=""
 
-# Number of tasks per node default : 1 task per node
-VSC_NUM_TASKS=1
+# Number of cpus per tasks default : 1 task per node
+VSC_CPUS_PER_TASK=1
 
 # Runtime limit default         : 1:00 hour
 VSC_RUN_TIME="01:00:00"
@@ -51,6 +51,9 @@ VSC_MEM_PER_JOB=2
 
 # Number of GPUs default        : 0 GPUs
 VSC_NUM_GPU=0
+
+# Partition ID default        : gpu
+VSC_PARTITION_ID="gpu"
 
 # Waiting interval default      : 30 seconds
 VSC_WAITING_INTERVAL=30
@@ -66,19 +69,20 @@ function display_help {
 cat <<-EOF
 $0: Script to start a VSCode remote server on Bessemer from a local computer
 
-Usage: start_vscode.sh [options]
+Usage: start_vscode_bessemer.sh [options]
 
 Options:
 
         -u | --username       USERNAME                  TUoS username for SSH connection to Bessemer
-        -n | --numtasks       NUM_TASKS_PER_NODE        Number of tasks per node
         -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM
+        -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
         -m | --memory         MEM_PER_JOB               Memory limit in GB per job. (RAM) Ex. 4 cores *4G = 16 
 
 Optional arguments:
 
         -c | --config         CONFIG_FILE               Configuration file for specifying options
         -g | --numgpu         NUM_GPU                   Number of GPUs to be used on the cluster
+        -p | --partition      PARTITION_ID              Partition ID to be used (gpu or gpu-a100-tmp)
         -h | --help                                     Display help for this script and quit
         -i | --interval       INTERVAL                  Time interval for checking if the job on the cluster already started
         -k | --key            SSH_KEY_PATH              Path to SSH key with non-standard name
@@ -86,16 +90,16 @@ Optional arguments:
 
 Examples:
 
-        ./start_vscode.sh -u te1st -n 4 -W 04:00:00 -m 4
+        ./start_vscode_bessemer.sh -u te1st -n 4 -W 04:00:00 -m 4
 
-        ./start_vscode.sh --username te1st --numtasks 2 --runtime 01:30:00 --memory 2
+        ./start_vscode_bessemer.sh --username te1st --numcpus 2 --runtime 01:30:00 --memory 2
 
-        ./start_vscode.sh -c $HOME/.vsc_config
+        ./start_vscode_bessemer.sh -c $HOME/.vsc_config
 
 Format of configuration file:
 
-VSC_USERNAME=""             # TUoS username for SSH connection to Bessemer
-VSC_NUM_TASKS=1             # Number of task per node
+VSC_USERNAME=""    # TUoS username for SSH connection to Bessemer
+VSC_CPUS_PER_TASK=1         # Number of cpu cores per task
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
 VSC_MEM_PER_JOB=2           # Memory limit in GB per job. (RAM) Ex. 4 cores *4G = 16
@@ -117,7 +121,7 @@ do
                 display_help
                 ;;
                 -v|--version)
-                echo -e "start_vscode.sh version: $VSC_VERSION\n"
+                echo -e "start_vscode_bessemer.sh version: $VSC_VERSION\n"
                 exit
                 ;;
                 -u|--username)
@@ -125,8 +129,8 @@ do
                 shift
                 shift
                 ;;
-                -n|--numcores)
-                VSC_NUM_TASKS=$2
+                -n|--numcpus)
+                VSC_CPUS_PER_TASK=$2
                 shift
                 shift
                 ;;
@@ -147,6 +151,10 @@ do
                 ;;
                 -g|--numgpu)
                 VSC_NUM_GPU=$2
+                shift
+                shift
+                ;;-p|--partition)
+                VSC_PARTITION_ID=$2
                 shift
                 shift
                 ;;
@@ -188,22 +196,23 @@ else
         echo -e "TUoS username: $VSC_USERNAME"
 fi
 
-# check number of CPU cores
+# check number of CPU per task
 
-# check if VSC_NUM_TASKS an integer
-if ! [[ "$VSC_NUM_TASKS" =~ ^[0-9]+$ ]]; then
-        echo -e "Error: $VSC_NUM_TASKS -> Incorrect format. Please specify number of tasks per node as an integer and try again\n"
+# check if VSC_CPUS_PER_TASK
+if ! [[ "$VSC_CPUS_PER_TASK" =~ ^[0-9c]+$ ]]; then 
+        echo -e "Error: $VSC_CPUS_PER_TASK -> Incorrect format. Please specify number of tasks per node as an integer and try again\n"
         display_help
 fi
 
-# check if VSC_NUM_TASKS is <= 40
-if [ "$VSC_NUM_TASKS" -gt "40" ]; then
-        echo -e "Error: $VSC_NUM_TASKS -> Larger than 40. No distributed memory supported, therefore the number of task per node needs to be smaller or equal to 40\n"
+# check if VSC_CPUS_PER_TASK is <= 40
+if [ "$VSC_CPUS_PER_TASK" -gt "40" ]; then
+        echo -e "Error: $VSC_CPUS_PER_TASK -> Larger than 40. No distributed memory supported, therefore the number of cpus per task needs to be smaller or equal to 40\n"
         display_help
 fi
 
-if [ "$VSC_NUM_TASKS" -gt "0" ]; then
-        echo -e "Requesting $VSC_NUM_TASKS tasks per node for running the code-server"
+if [ "$VSC_CPUS_PER_TASK" -gt "0" ]; then
+        echo -e "Requesting $VSC_CPUS_PER_TASK cpus per task for running the code-server"
+        display_help
 fi
 
 # check number of GPUs
@@ -216,18 +225,28 @@ fi
 
 # check if VSC_NUM_GPU is <= 4
 if [ "$VSC_NUM_GPU" -gt "4" ]; then
-        echo -e "Error: No distributed memory supported, therefore number of GPUs needs to be smaller or equal to 7\n"
+        echo -e "Error: No distributed memory supported, therefore number of GPUs needs to be smaller or equal to 4\n"
         display_help
 fi
 
 if [ "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Requesting $VSC_NUM_GPU GPUs for running the code-server"
-        VSC_SNUM_GPU="-l gpu=$VSC_NUM_GPU"
+        VSC_SNUM_GPU="--gpus-per-node=$VSC_NUM_GPU"
 else
         VSC_SNUM_GPU=""
 fi
+# check if VSC_PARTITION_ID is set
+if [ "$VSC_NUM_GPU" -gt "0" ] && {[ "$VSC_PARTITION_ID" == "gpu"  ] || [ "$VSC_PARTITION_ID" == "gpu-a100-tmp"  ]} ; then
+        echo -e "Requesting partition $VSC_PARTITION_ID"
+        VSC_SNUM_GPU="--partition=$VSC_PARTITION_ID --qos=gpu $VSC_SNUM_GPU"
+else
+        if [ "$VSC_NUM_GPU" -gt "0" ]; then
+                echo -e "Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
+                display_help
+        fi      
+fi
 
-if [ ! "$VSC_NUM_TASKS" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
+if [ "$VSC_CPUS_PER_TASK" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Error: No CPU and no GPU resources requested, terminating script"
         display_help
 fi
@@ -331,10 +350,10 @@ ssh -T $VSC_SSH_OPT "sed -i '/^password:/d' ~/.config/code-server/config.yaml &&
 echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
-echo -e "============================================================================================"
-echo -e "ssh ${VSC_SSH_OPT} sbatch --export=ALL --ntasks-per-node=${VSC_NUM_TASKS} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU}"
-echo -e "============================================================================================\n"
-ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --ntasks-per-node=${VSC_NUM_TASKS} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU} <<ENDSBATCH
+echo -e "==================================================================================="
+echo -e "ssh ${VSC_SSH_OPT} sbatch --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU}"
+echo -e "===================================================================================\n"
+ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU} << ENDSBATCH
 source \${HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
