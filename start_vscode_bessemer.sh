@@ -359,7 +359,6 @@ sourcenode{HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
 VSC_IP_REMOTE="\$(hostname)"
-#VSC_PORT_REMOTE="8899"
 VSC_PORT_REMOTE=$(comm -23 <(seq 49152 65535 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
 echo "Remote IP:\$VSC_IP_REMOTE" > /home/$VSC_USERNAME/vscip
 echo "Remote PORT:\$VSC_PORT_REMOTE" > /home/$VSC_USERNAME/vscport
