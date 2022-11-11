@@ -313,7 +313,7 @@ SSLCERT=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/vscode_remote_ssl-server-ce
 SSLCERTKEY=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem ] && echo 1 || echo 0")
 
 if [[ "$SSLCERT" == 0 ]] || [[ "$SSLCERTKEY" == 0 ]] ; then
-        echo -e "Missing SSL certificate or key. Exiting! Please 'module load apps/vscode-server/4.2.0/binary' run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
+        echo -e "Missing SSL certificate or key. Exiting! Please 'module load apps/vscode-server/4.2.0/binary' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
         exit 1
 fi
 
