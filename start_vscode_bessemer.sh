@@ -213,7 +213,6 @@ fi
 
 if [ "$VSC_CPUS_PER_TASK" -gt "0" ]; then
         echo -e "Requesting $VSC_CPUS_PER_TASK cpus per task for running the code-server"
-        display_help
 fi
 
 # check number of GPUs
