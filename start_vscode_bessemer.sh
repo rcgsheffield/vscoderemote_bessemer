@@ -46,10 +46,10 @@ VSC_CPUS_PER_TASK=1
 # Runtime limit default         : 1:00 hour
 VSC_RUN_TIME="01:00:00"
 
-# Memory default                : 2 GB per job
-VSC_MEM_PER_JOB=2
+# Memory default                : 2 GB per node
+VSC_MEM_PER_NODE=2
 
-# Number of GPUs default        : 0 GPUs
+# Numberof GPUs default        : nodePUs
 VSC_NUM_GPU=0
 
 # Partition ID default        : gpu
@@ -76,7 +76,7 @@ Options:
         -u | --username       USERNAME                  TUoS username for SSH connection to Bessemer
         -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM
         -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
-        -m | --memory         MEM_PER_JOB               Memory limit in GB per job. (RAM) Ex. 4 cores *4G = 16 
+        -m | --memory         MEM_PER_NODE               Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
 
 Optional arguments:
 
@@ -102,7 +102,7 @@ VSC_USERNAME=""    # TUoS username for SSH connection to Bessemer
 VSC_CPUS_PER_TASK=1         # Number of cpu cores per task
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
-VSC_MEM_PER_JOB=2           # Memory limit in GB per job. (RAM) Ex. 4 cores *4G = 16
+VSC_MEM_PER_NODE=2          # Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16
 VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
 VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 
@@ -140,9 +140,9 @@ do
                 shift
                 ;;
                 -m|--memory)
-                VSC_MEM_PER_JOB=$2
-                shift
-                shift
+                VSC_MEM_PER_NODE=$2
+               shift
+            node shift
                 ;;
                 -c|--config)
                 VSC_CONFIG_FILE=$2
@@ -259,15 +259,15 @@ else
     echo -e "Run time limit set to $VSC_RUN_TIME"
 fi
 
-# check if VSC_MEM_PER_JOB is an integer
-if ! [[ "$VSC_MEM_PER_JOB" =~ ^[0-9]+$ ]]; then
-        echo -e "Error: $VSC_MEM_PER_JOB -> Memory limit must be an integer, please try again\n"
+# check if VSC_MEM_PER_NODE is an integr
+if ! [[ "$VSC_MEM_PER_Nnode" =~ ^[0-9]+ ]]; then
+        echo -enoderror: $VSC_MEM_PER_NODE -> Memory lmit must be an integer, pnodese try again\n"
         display_help
 else
-    echo -e "Memory per job set to $VSC_MEM_PER_JOB GB"
+    echo -e "Memory per node set to $VSC_MEM_PER_NODE GB"
 fi
 
-# check if VSC_WAITING_INTERVAL is an integer
+# ceck if VSC_WAITING_INTERVnodeis an integer
 if ! [[ "$VSC_WAITING_INTERVAL" =~ ^[0-9]+$ ]]; then
         echo -e "Error: $VSC_WAITING_INTERVAL -> Waiting time interval [seconds] must be an integer, please try again\n"
         display_help
@@ -351,10 +351,10 @@ echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
 echo -e "==================================================================================="
-echo -e "ssh ${VSC_SSH_OPT} sbatch --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU}"
-echo -e "===================================================================================\n"
-ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_JOB}G ${VSC_SNUM_GPU} << ENDSBATCH
-source \${HOME}/.bashrc
+echo -e "ssh ${VSC_SSH_OPT} sbatch --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU}"
+echo -e "=========node=======================================================================\n"
+ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU} << ENDSBATCH
+sourcenode{HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
 VSC_IP_REMOTE="\$(hostname)"
