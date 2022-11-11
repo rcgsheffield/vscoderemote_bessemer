@@ -276,7 +276,7 @@ else
 fi
 
 # set modules
-VSC_MODULE_COMMAND="apps/vscode-server/4.2.0/binary dev/git/2.35.2/gcc-4.9.4"
+VSC_MODULE_COMMAND="vscode-server/4.2.0/binary git/2.28.0-GCCcore-10.2.0-nodocs"
 
 # check if VSC_SSH_KEY_PATH is empty or contains a valid path
 if [ -z "$VSC_SSH_KEY_PATH" ]; then
