@@ -142,8 +142,8 @@ do
                 ;;
                 -m|--memory)
                 VSC_MEM_PER_NODE=$2
-               shift
-            node shift
+                shift
+                shift
                 ;;
                 -c|--config)
                 VSC_CONFIG_FILE=$2
