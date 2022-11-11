@@ -99,7 +99,7 @@ Examples:
 
 Format of configuration file:
 
-VSC_USERNAME=""    # TUoS username for SSH connection to Bessemer
+VSC_USERNAME=""             # TUoS username for SSH connection to Bessemer
 VSC_CPUS_PER_TASK=1         # Number of cpu cores per task
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
@@ -352,9 +352,9 @@ echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
 echo -e "==================================================================================="
-echo -e "ssh ${VSC_SSH_OPT} sbatch --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU}"
+echo -e "ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU}"
 echo -e "=========node=======================================================================\n"
-ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU} << ENDSBATCH
+ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU} << ENDSBATCH
 sourcenode{HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
