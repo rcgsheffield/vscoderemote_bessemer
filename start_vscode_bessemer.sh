@@ -14,6 +14,7 @@
 #                                                                             #
 #  28.10.2021    Initial version of the script based on Jupyter script        #
 #  Forked and edited for TUoS by J.Moore                                      #
+#  Edited for use with Bessemer for TUoS by C.D.Kennedy                       #
 ###############################################################################
 
 ###############################################################################
