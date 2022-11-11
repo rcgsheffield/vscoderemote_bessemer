@@ -332,9 +332,9 @@ echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
 echo -e "============================================================================================"
-echo -e "ssh ${VSC_SSH_OPT} qsub -V -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU}"
+echo -e "ssh ${VSC_SSH_OPT} qsub -V -N VSCodeServer  -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU}"
 echo -e "============================================================================================\n"
-ssh ${VSC_SSH_OPT} qsub -N VSCodeServer -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU} <<ENDQSUB
+ssh ${VSC_SSH_OPT} qsub -V -N VSCodeServer  -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU} <<ENDQSUB
 source \${HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
