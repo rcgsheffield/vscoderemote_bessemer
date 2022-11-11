@@ -354,7 +354,8 @@ echo -e "=======================================================================
 echo -e "ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU}"
 echo -e "================================================================================\n"
 ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} --time=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU} << ENDSBATCH
-sourcenode{HOME}/.bashrc
+#!/bin/sh
+source{HOME}/.bashrc
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
 VSC_IP_REMOTE="\$(hostname)"
