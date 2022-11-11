@@ -259,7 +259,7 @@ else
     echo -e "Run time limit set to $VSC_RUN_TIME"
 fi
 
-# check if VSC_MEM_PER_NODE is an integr
+# check if VSC_MEM_PER_NODE is an integer
 if ! [[ "$VSC_MEM_PER_Nnode" =~ ^[0-9]+ ]]; then
         echo -enoderror: $VSC_MEM_PER_NODE -> Memory lmit must be an integer, pnodese try again\n"
         display_help
