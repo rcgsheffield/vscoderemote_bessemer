@@ -267,7 +267,7 @@ else
     echo -e "Memory per node set to $VSC_MEM_PER_NODE GB"
 fi
 
-# ceck if VSC_WAITING_INTERVnodeis an integer
+# check if VSC_WAITING_INTERVAL is an integer
 if ! [[ "$VSC_WAITING_INTERVAL" =~ ^[0-9]+$ ]]; then
         echo -e "Error: $VSC_WAITING_INTERVAL -> Waiting time interval [seconds] must be an integer, please try again\n"
         display_help
