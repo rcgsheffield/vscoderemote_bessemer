@@ -246,7 +246,7 @@ else
         fi      
 fi
 
-if [ "$VSC_CPUS_PER_TASK" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
+if [ ! "$VSC_CPUS_PER_TASK" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Error: No CPU and no GPU resources requested, terminating script"
         display_help
 fi
