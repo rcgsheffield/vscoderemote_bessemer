@@ -154,7 +154,8 @@ do
                 VSC_NUM_GPU=$2
                 shift
                 shift
-                ;;-p|--partition)
+                ;;
+                -p|--partition)
                 VSC_PARTITION_ID=$2
                 shift
                 shift
@@ -236,14 +237,12 @@ else
         VSC_SNUM_GPU=""
 fi
 # check if VSC_PARTITION_ID is set
-if [ "$VSC_NUM_GPU" -gt "0" ] && {[ "$VSC_PARTITION_ID" == "gpu"  ] || [ "$VSC_PARTITION_ID" == "gpu-a100-tmp"  ]} ; then
-        echo -e "Requesting partition $VSC_PARTITION_ID"
-        VSC_SNUM_GPU="--partition=$VSC_PARTITION_ID --qos=gpu $VSC_SNUM_GPU"
+if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] || [ "$VSC_PARTITION_ID" == "gpu-a100-tmp" ] ); then
+        echo -e "Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
+        display_help
 else
-        if [ "$VSC_NUM_GPU" -gt "0" ]; then
-                echo -e "Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
-                display_help
-        fi      
+        echo -e "Requesting partition $VSC_PARTITION_ID"
+        VSC_SNUM_GPU="--partition=$VSC_PARTITION_ID --qos=gpu $VSC_SNUM_GPU"  
 fi
 
 if [ ! "$VSC_CPUS_PER_TASK" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
@@ -260,8 +259,8 @@ else
 fi
 
 # check if VSC_MEM_PER_NODE is an integer
-if ! [[ "$VSC_MEM_PER_Nnode" =~ ^[0-9]+ ]]; then
-        echo -enoderror: $VSC_MEM_PER_NODE -> Memory lmit must be an integer, pnodese try again\n"
+if ! [[ "$VSC_MEM_PER_NODE" =~ ^[0-9]+ ]]; then
+        echo -e "Error: $VSC_MEM_PER_NODE -> Memory lmit must be an integer, please try again\n"
         display_help
 else
     echo -e "Memory per node set to $VSC_MEM_PER_NODE GB"
@@ -351,11 +350,11 @@ echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
 echo -e "==================================================================================="
-echo -e "ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU}"
+echo -e "ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNUM_GPU}"
 echo -e "================================================================================\n"
-ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} --time=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNU_GPU} << ENDSBATCH
+ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} --time=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNUM_GPU} << ENDSBATCH
 #!/bin/sh
-source{HOME}/.bashrc
+source "\${HOME}/.bashrc"
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
 VSC_IP_REMOTE="\$(hostname)"
@@ -389,7 +388,7 @@ VSC_REMOTE_JID=$(ssh $VSC_SSH_OPT "cat /home/$VSC_USERNAME/vscjid | grep -m1 'Re
 if  [[ "$VSC_REMOTE_IP" == "" ]]; then
 cat <<EOF
 Error: remote ip is not defined. Terminating script.
-* Please check login to the cluster and check with qstat if the batch job on the cluster is running and terminate it with qdel.
+* Please login to the cluster and check with squeue if the batch job on the cluster is running and terminate it with scancel.
 EOF
 exit 1
 fi
@@ -474,5 +473,5 @@ read -p "Please press enter to end the session, disconnect the SSH tunnel and te
 kill $SSH_TUNNEL_PID
 
 # Terminate the job on Bessemer and remove the vscjid file.
-ssh -T $VSC_SSH_OPT "qdel $VSC_REMOTE_JID && rm /home/$VSC_USERNAME/vscjid /home/$VSC_USERNAME/vscip /home/$VSC_USERNAME/vscport"
+ssh -T $VSC_SSH_OPT "scancel $VSC_REMOTE_JID && rm /home/$VSC_USERNAME/vscjid /home/$VSC_USERNAME/vscip /home/$VSC_USERNAME/vscport"
 exit
