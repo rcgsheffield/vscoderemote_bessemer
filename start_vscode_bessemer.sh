@@ -193,7 +193,7 @@ fi
 # check that VSC_USERNAME is not an empty string
 if [ -z "$VSC_USERNAME" ]
 then
-        echo -e "Error: No TUoS username is specified, terminating script\n"
+        echo -e "\n Error: No TUoS username is specified, terminating script\n"
         display_help
 else
         echo -e "TUoS username: $VSC_USERNAME"
@@ -203,13 +203,13 @@ fi
 
 # check if VSC_CPUS_PER_TASK
 if ! [[ "$VSC_CPUS_PER_TASK" =~ ^[0-9c]+$ ]]; then 
-        echo -e "Error: $VSC_CPUS_PER_TASK -> Incorrect format. Please specify number of tasks per node as an integer and try again\n"
+        echo -e "\n Error: $VSC_CPUS_PER_TASK -> Incorrect format. Please specify number of tasks per node as an integer and try again\n"
         display_help
 fi
 
 # check if VSC_CPUS_PER_TASK is <= 40
 if [ "$VSC_CPUS_PER_TASK" -gt "40" ]; then
-        echo -e "Error: $VSC_CPUS_PER_TASK -> Larger than 40. No distributed memory supported, therefore the number of cpus per task needs to be smaller or equal to 40\n"
+        echo -e "\n Error: $VSC_CPUS_PER_TASK -> Larger than 40. No distributed memory supported, therefore the number of cpus per task needs to be smaller or equal to 40\n"
         display_help
 fi
 
@@ -221,13 +221,13 @@ fi
 
 # check if VSC_NUM_GPU an integer
 if ! [[ "$VSC_NUM_GPU" =~ ^[0-9]+$ ]]; then
-        echo -e "Error: $VSC_NUM_GPU -> Incorrect format. Please specify the number of GPU as an integer and try again\n"
+        echo -e "\n Error: $VSC_NUM_GPU -> Incorrect format. Please specify the number of GPU as an integer and try again\n"
         display_help
 fi
 
 # check if VSC_NUM_GPU is <= 4
 if [ "$VSC_NUM_GPU" -gt "4" ]; then
-        echo -e "Error: No distributed memory supported, therefore number of GPUs needs to be smaller or equal to 4\n"
+        echo -e "\n Error: No distributed memory supported, therefore number of GPUs needs to be smaller or equal to 4\n"
         display_help
 fi
 
@@ -240,7 +240,7 @@ fi
 
 # check if VSC_PARTITION_ID is set
 if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] || [ "$VSC_PARTITION_ID" == "gpu-a100-tmp" ] ); then
-        echo -e "Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
+        echo -e "\n Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
         display_help
 elif [ "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Requesting partition $VSC_PARTITION_ID"
@@ -248,18 +248,18 @@ elif [ "$VSC_NUM_GPU" -gt "0" ]; then
 fi
 
 if [ ! "$VSC_CPUS_PER_TASK" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
-        echo -e "Error: No CPU and no GPU resources requested, terminating script"
+        echo -e "\n Error: No CPU and no GPU resources requested, terminating script"
         display_help
 fi
 
 if [ "$VSC_NUM_GPU" -gt "0" -a ! "$VSC_CPUS_PER_TASK" -gt "0" ]; then
-        echo -e "Error: No CPU resource requested whilst GPU resources are requested, terminating script"
+        echo -e "\n Error: No CPU resource requested whilst GPU resources are requested, terminating script"
         display_help
 fi
 
 # check if VSC_RUN_TIME is provided in HH:MM:SS format
 if ! [[ "$VSC_RUN_TIME" =~ ^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$ ]]; then
-        echo -e "Error: $VSC_RUN_TIME -> Incorrect format. Please specify runtime limit in the format HH:MM:SS and try again\n"
+        echo -e "\n Error: $VSC_RUN_TIME -> Incorrect format. Please specify runtime limit in the format HH:MM:SS and try again\n"
         display_help
 else
     echo -e "Run time limit set to $VSC_RUN_TIME"
@@ -267,7 +267,7 @@ fi
 
 # check if VSC_MEM_PER_NODE is an integer
 if ! [[ "$VSC_MEM_PER_NODE" =~ ^[0-9]+ ]]; then
-        echo -e "Error: $VSC_MEM_PER_NODE -> Memory lmit must be an integer, please try again\n"
+        echo -e "\n Error: $VSC_MEM_PER_NODE -> Memory lmit must be an integer, please try again\n"
         display_help
 else
     echo -e "Memory per node set to $VSC_MEM_PER_NODE GB"
