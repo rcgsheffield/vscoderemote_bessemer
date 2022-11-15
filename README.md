@@ -39,6 +39,11 @@ You can either use the -k option of the script to specify the location of the SS
  Host sharc.shef.ac.uk
  IdentityFile ~/.ssh/id_ed25519_sharc
 ```
+or
+```
+ Host bessemer.shef.ac.uk
+ IdentityFile ~/.ssh/id_ed25519_bessemer
+```
 
 ### WSL requirements
 
@@ -50,7 +55,9 @@ export DISPLAY=localhost:0
 
 In addition, if you wish to leverage your existing Windows host machine's OpenSSH ssh-agent you can follow the instructions here: https://stuartleeks.com/posts/wsl-ssh-key-forward-to-windows/
 
-## Preparation Steps
+## Preparation Steps 
+
+### ShARC see below for [Bessemer instructions](### Bessmer)
 
 The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your ShARC account with regards to the code-server.
 
@@ -64,6 +71,23 @@ Load the modules for one of the code-server installations:
 ```
 module load apps/vscode-server/4.2.0/binary
 ```
+[Next step](### Initiate code server)
+
+### Bessmer
+
+The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your Bessemer account with regards to the code-server.
+
+Login to the Bessemer cluster and start an interactive job with:
+
+```
+srun --pty bash -i
+```
+Load the modules for one of the code-server installations:
+
+```
+module load vscode-server/4.2.0/binary
+```
+### Initiate code server
 
 Start the code-server once with the command code-server
 
@@ -86,7 +110,7 @@ After the server has fully started, terminate it by pressing Ctrl+C .
 Now you should generate your SSL certificates (these secure the communications between your local device and the endpoint worker node running the vscode server.)
 
 ```
-[te1st@sharc.shef.ac.uk ~]$ setup_ssl_ca_server_client.sh
+setup_ssl_ca_server_client.sh
 ```
 
 
@@ -101,15 +125,15 @@ Download the repository with the command
 git clone git@github.com:rcgsheffield/vscoderemote_sheffield_hpc.git
 ```
 
-### Starting VSCode Remote server using a batch job
+### Starting VSCode Remote server using a batch job on ShARC (see below for [Bessemer instructions](### Starting VSCode Remote server using a batch job on Bessmer))
 
-The start_vscode.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a ShARC worker node. Please find below the list of options that can be used with the script:
+The start_vscode_sharc.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a ShARC worker node. Please find below the list of options that can be used with the script:
 
 ```
-$ ./start_vscode.sh --help
-./start_vscode.sh: Script to start a VSCode remote server on ShARC from a local computer
+$ ./start_vscode_sharc.sh --help
+./start_vscode_sharc.sh: Script to start a VSCode remote server on ShARC from a local computer
 
-Usage: start_vscode.sh [options]
+Usage: start_vscode_sharc.sh [options]
 
 Options:
 
@@ -129,11 +153,11 @@ Optional arguments:
 
 Examples:
 
-        ./start_vscode.sh -u te1st -n 4 -W 04:00:00 -m 2048
+        ./start_vscode_sharc.sh -u te1st -n 4 -W 04:00:00 -m 2048
 
-        ./start_vscode.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 2048
+        ./start_vscode_sharc.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 2048
 
-        ./start_vscode.sh -c /home/te1st/.vsc_config
+        ./start_vscode_sharc.sh -c /home/te1st/.vsc_config
 
 Format of configuration file:
 
@@ -147,6 +171,56 @@ VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 ```
 
 Once a session starts the code-server password is randomly regenerated and the new password will be supplied to you in the terminal alongside the SSL certificate fingerprints. Before clicking past the SSL warning (as the generated certificates are not trusted by default) check the fingerprints match in browser and in terminal.
+[Next step](### Reconnect to a code-server session)
+
+
+### Starting VSCode Remote server using a batch job on Bessmer
+
+The start_vscode.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a Bessemer worker node. Please find below the list of options that can be used with the script:
+
+```
+$ ./start_vscode_bessemer.sh --help
+./start_vscode_bessemer.sh: Script to start a VSCode remote server on Bessemer from a local computer
+
+Usage: start_vscode_bessemer.sh [options]
+
+Options:
+
+        -u | --username       USERNAME                  TUoS username for SSH connection to Bessemer
+        -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM
+        -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
+        -m | --memory         MEM_PER_NODE              Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
+
+Optional arguments:
+
+        -c | --config         CONFIG_FILE               Configuration file for specifying options
+        -g | --numgpu         NUM_GPU                   Number of GPUs to be used on the cluster
+        -p | --partition      PARTITION_ID              Partition ID to be used (gpu or gpu-a100-tmp)
+        -h | --help                                     Display help for this script and quit
+        -i | --interval       INTERVAL                  Time interval for checking if the job on the cluster already started
+        -k | --key            SSH_KEY_PATH              Path to SSH key with non-standard name
+        -v | --version                                  Display version of the script and exit
+
+Examples:
+
+        ./start_vscode_bessemer.sh -u te1st -n 4 -W 04:00:00 -m 4
+
+        ./start_vscode_bessemer.sh --username te1st --numcpus 2 --runtime 01:30:00 --memory 2
+
+        ./start_vscode_bessemer.sh -c $HOME/.vsc_config
+
+Format of configuration file:
+
+VSC_USERNAME=""             # TUoS username for SSH connection to Bessemer
+VSC_CPUS_PER_TASK=1         # Number of cpu cores per task
+VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
+VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
+VSC_MEM_PER_NODE=2          # Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16
+VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
+VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
+```
+
+Once a session starts the code-server password is randomly regenerated and the new password will be supplied to you in the terminal alongside the SSL certificate fingerprints. Before clicking past the SSL warning (as the generated certificates are not trusted by default) check the fingerprints match in browser and in terminal
 
 ### Reconnect to a code-server session
 When running the script, it creates a local file called reconnect_info in the installation directory, which contains all information regarding the used ports, the remote ip address, the command for the SSH tunnel and the URL for the browser. This information should be sufficient to reconnect to a code-server session if connection was lost.
