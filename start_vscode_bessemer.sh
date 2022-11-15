@@ -77,7 +77,7 @@ Options:
         -u | --username       USERNAME                  TUoS username for SSH connection to Bessemer
         -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM
         -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
-        -m | --memory         MEM_PER_NODE               Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
+        -m | --memory         MEM_PER_NODE              Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
 
 Optional arguments:
 
@@ -361,7 +361,7 @@ VSC_IP_REMOTE="\$(hostname)"
 VSC_PORT_REMOTE=$(comm -23 <(seq 49152 65535 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
 echo "Remote IP:\$VSC_IP_REMOTE" > /home/$VSC_USERNAME/vscip
 echo "Remote PORT:\$VSC_PORT_REMOTE" > /home/$VSC_USERNAME/vscport
-echo "Remote JOB ID:\$JOB_ID" > /home/$VSC_USERNAME/vscjid
+echo "Remote JOB ID:\$SLURM_JOB_ID" > /home/$VSC_USERNAME/vscjid
 code-server --cert ~/.ssl/vscoderemote/vscode_remote_ssl-server-cert.pem --cert-key ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem --bind-addr=\${VSC_IP_REMOTE}:\${VSC_PORT_REMOTE}
 ENDSBATCH
 
