@@ -68,6 +68,7 @@ VSC_SSH_KEY_PATH=""
 
 function display_help {
 cat <<-EOF
+
 $0: Script to start a VSCode remote server on Bessemer from a local computer
 
 Usage: start_vscode_bessemer.sh [options]
@@ -236,11 +237,12 @@ if [ "$VSC_NUM_GPU" -gt "0" ]; then
 else
         VSC_SNUM_GPU=""
 fi
+
 # check if VSC_PARTITION_ID is set
 if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] || [ "$VSC_PARTITION_ID" == "gpu-a100-tmp" ] ); then
         echo -e "Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
         display_help
-else
+elif [ "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Requesting partition $VSC_PARTITION_ID"
         VSC_SNUM_GPU="--partition=$VSC_PARTITION_ID --qos=gpu $VSC_SNUM_GPU"  
 fi
@@ -350,7 +352,7 @@ echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
 echo -e "==================================================================================="
-echo -e "ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -t=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNUM_GPU}"
+echo -e "ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -time=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNUM_GPU}"
 echo -e "================================================================================\n"
 ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} --time=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNUM_GPU} << ENDSBATCH
 #!/bin/sh
