@@ -1,6 +1,4 @@
 
-# WARNING - RECENT FORK - NOT FIXED FOR BESSEMER YET
-
 # VSCode Remote HPC
 
 This script can be used to start a batch job on the cluster and then connect Microsoft VSCode to it. The script is inspired by the blog 
@@ -57,7 +55,7 @@ In addition, if you wish to leverage your existing Windows host machine's OpenSS
 
 ## Preparation Steps 
 
-### ShARC see below for [Bessemer instructions](### Bessmer)
+### ShARC preperation (see below for [Bessemer preperation](###bessemer-preperation))
 
 The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your ShARC account with regards to the code-server.
 
@@ -71,9 +69,9 @@ Load the modules for one of the code-server installations:
 ```
 module load apps/vscode-server/4.2.0/binary
 ```
-[Next step](### Initiate code server)
+[Jump to step Initiate code-server](###initiate-code--server)
 
-### Bessmer
+### Bessemer preperation
 
 The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your Bessemer account with regards to the code-server.
 
@@ -92,7 +90,7 @@ module load vscode-server/4.2.0/binary
 Start the code-server once with the command code-server
 
 ```
-[te1st@sharc.shef.ac.uk ~]$ code-server
+[te1st@bessemer.shef.ac.uk ~]$ code-server
 [2022-04-04T10:01:45.407Z] info  code-server 4.2.0
 [2022-04-04T10:01:45.409Z] info  Using user-data-dir ~/.local/share/code-server
 [2022-04-04T10:01:45.433Z] info  Using config file ~/.config/code-server/config.yaml
@@ -100,7 +98,7 @@ Start the code-server once with the command code-server
 [2022-04-04T10:01:45.433Z] info    - Authentication is enabled
 [2022-04-04T10:01:45.433Z] info      - Using password from ~/.config/code-server/config.yaml
 [2022-04-04T10:01:45.433Z] info    - Not serving HTTPS
-[te1st@sharc.shef.ac.uk ~]$ 
+[te1st@bessemer.shef.ac.uk ~]$ 
 ```
 
 This will setup the local configuration (including a password for you) and store it in your home directory in $HOME/.config/code-server/config.yaml
@@ -125,7 +123,7 @@ Download the repository with the command
 git clone git@github.com:rcgsheffield/vscoderemote_sheffield_hpc.git
 ```
 
-### Starting VSCode Remote server using a batch job on ShARC (see below for [Bessemer instructions](### Starting VSCode Remote server using a batch job on Bessmer))
+### Starting VSCode Remote server using a batch job on ShARC (see below for [Bessemer instructions](###starting-vscode-remote-server-using-a-batch-job-on-bessmer))
 
 The start_vscode_sharc.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a ShARC worker node. Please find below the list of options that can be used with the script:
 
@@ -171,7 +169,7 @@ VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 ```
 
 Once a session starts the code-server password is randomly regenerated and the new password will be supplied to you in the terminal alongside the SSL certificate fingerprints. Before clicking past the SSL warning (as the generated certificates are not trusted by default) check the fingerprints match in browser and in terminal.
-[Next step](### Reconnect to a code-server session)
+[Next step - reconnect to a code server session](###-reconnect-to-a-code-server-session)
 
 
 ### Starting VSCode Remote server using a batch job on Bessmer
