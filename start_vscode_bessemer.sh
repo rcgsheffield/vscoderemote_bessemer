@@ -252,6 +252,11 @@ if [ ! "$VSC_CPUS_PER_TASK" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
         display_help
 fi
 
+if [ "$VSC_NUM_GPU" -gt "0" -a ! "$VSC_CPUS_PER_TASK" -gt "0" ]; then
+        echo -e "Error: No CPU resource requested whilst GPU resources are requested, terminating script"
+        display_help
+fi
+
 # check if VSC_RUN_TIME is provided in HH:MM:SS format
 if ! [[ "$VSC_RUN_TIME" =~ ^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$ ]]; then
         echo -e "Error: $VSC_RUN_TIME -> Incorrect format. Please specify runtime limit in the format HH:MM:SS and try again\n"
