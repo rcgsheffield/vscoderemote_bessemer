@@ -169,10 +169,10 @@ VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 ```
 
 Once a session starts the code-server password is randomly regenerated and the new password will be supplied to you in the terminal alongside the SSL certificate fingerprints. Before clicking past the SSL warning (as the generated certificates are not trusted by default) check the fingerprints match in browser and in terminal.
-[Next step - reconnect to a code server session](###-reconnect-to-a-code-server-session)
+[Jump to step - reconnect to a code server session](###-reconnect-to-a-code-server-session)
 
 
-### Starting VSCode Remote server using a batch job on Bessmer
+### Starting VSCode Remote server using a batch job on Bessemer
 
 The start_vscode.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a Bessemer worker node. Please find below the list of options that can be used with the script:
 
