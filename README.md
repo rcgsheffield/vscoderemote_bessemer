@@ -55,7 +55,7 @@ In addition, if you wish to leverage your existing Windows host machine's OpenSS
 
 ## Preparation Steps 
 
-### ShARC preperation (see below for [Bessemer preperation](#-bessemer-preperation))
+### ShARC preperation (see below for [Bessemer preperation](https://github.com/rcgsheffield/vscoderemote_sheffield_hpc#bessemer-preperation))
 
 The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your ShARC account with regards to the code-server.
 
