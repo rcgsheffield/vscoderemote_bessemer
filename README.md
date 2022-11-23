@@ -69,6 +69,7 @@ Load the modules for one of the code-server installations:
 ```
 module load apps/vscode-server/4.2.0/binary
 ```
+
 [Jump to step Initiate code-server](#initiate-code-server)
 
 ### Bessemer preperation
@@ -171,7 +172,6 @@ VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 Once a session starts the code-server password is randomly regenerated and the new password will be supplied to you in the terminal alongside the SSL certificate fingerprints. Before clicking past the SSL warning (as the generated certificates are not trusted by default) check the fingerprints match in browser and in terminal.
 
 [Jump to step - reconnect to a code server session](#reconnect-to-a-code-server-session)
-
 
 ### Starting VSCode Remote server using a batch job on Bessemer
 
