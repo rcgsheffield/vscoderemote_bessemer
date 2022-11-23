@@ -55,7 +55,7 @@ In addition, if you wish to leverage your existing Windows host machine's OpenSS
 
 ## Preparation Steps 
 
-### ShARC preperation (see below for [Bessemer preperation](#bessemer-preperation))
+### ShARC preparation (see below for [Bessemer preparation](#bessemer-preparation))
 
 The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your ShARC account with regards to the code-server.
 
@@ -72,7 +72,7 @@ module load apps/vscode-server/4.2.0/binary
 
 [Jump to step Initiate code-server](#initiate-code-server)
 
-### Bessemer preperation
+### Bessemer preparation
 
 The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your Bessemer account with regards to the code-server.
 
