@@ -69,7 +69,7 @@ Load the modules for one of the code-server installations:
 ```
 module load apps/vscode-server/4.2.0/binary
 ```
-[Jump to step Initiate code-server](###initiate-code--server)
+[Jump to step Initiate code-server](https://github.com/rcgsheffield/vscoderemote_sheffield_hpc#initiate-code-server)
 
 ### Bessemer preperation
 
@@ -123,7 +123,7 @@ Download the repository with the command
 git clone git@github.com:rcgsheffield/vscoderemote_sheffield_hpc.git
 ```
 
-### Starting VSCode Remote server using a batch job on ShARC (see below for [Bessemer instructions](###starting-vscode-remote-server-using-a-batch-job-on-bessmer))
+### Starting VSCode Remote server using a batch job on ShARC (see below for [Bessemer instructions](https://github.com/rcgsheffield/vscoderemote_sheffield_hpc#starting-vscode-remote-server-using-a-batch-job-on-bessemer))
 
 The start_vscode_sharc.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a ShARC worker node. Please find below the list of options that can be used with the script:
 
@@ -169,7 +169,8 @@ VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 ```
 
 Once a session starts the code-server password is randomly regenerated and the new password will be supplied to you in the terminal alongside the SSL certificate fingerprints. Before clicking past the SSL warning (as the generated certificates are not trusted by default) check the fingerprints match in browser and in terminal.
-[Jump to step - reconnect to a code server session](###-reconnect-to-a-code-server-session)
+
+[Jump to step - reconnect to a code server session](https://github.com/rcgsheffield/vscoderemote_sheffield_hpc#reconnect-to-a-code-server-session)
 
 
 ### Starting VSCode Remote server using a batch job on Bessemer
