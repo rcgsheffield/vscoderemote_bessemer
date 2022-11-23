@@ -115,7 +115,7 @@ setup_ssl_ca_server_client.sh
 
 ## Usage instructions
 
-### Installation
+### Installation on your local machine
 
 Download the repository with the command
 
