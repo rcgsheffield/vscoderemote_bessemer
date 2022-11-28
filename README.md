@@ -41,7 +41,7 @@ The script assumes that you have setup SSH keys for passwordless access to the c
 
 https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-22-04
 
-Currently the script should run on Linux (tested on Ubuntu), Mac OS X (untested) and Windows (using [WSL/WSL2](#wsl-requirements)  which has been tested with Ubuntu or git bash which is untested). 
+Currently the scripts should run on Linux (tested on Ubuntu), Mac OS X (untested) and Windows (using [WSL/WSL2](#wsl-requirements) tested with Ubuntu or git bash (untested). 
 
 When using a Linux computer, please make sure that ```xdg-open``` is available. This package is used to automatically start your default browser. You can install it with the command
 
