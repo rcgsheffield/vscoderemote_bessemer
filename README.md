@@ -1,7 +1,11 @@
 
 # VSCode Remote HPC
 
-Following the instructions below you will initaite the code server on the cluster, then from your local machine call a script which will start a batch job on the cluster and connect your local machine to it. This will enable you to access the initated Microsoft VSCode session on the cluster through a local browser. 
+The purpose of this repository and the two start_vscode.sh scripts is to enable you to run VSCode Remote safely on a worker node using the Sheffield University HPC clusters.
+
+Following the instructions below, you will run some VScode Remote setup tasks on the cluster/s, then from your **local** machine you run the script/s to start a VSCode Remote server within a batch job and connect your local machine to it.
+
+The access to the initiated Microsoft VSCode session on the cluster is made through your local machine's web browser. 
 The script is inspired by the blog
 
 https://medium.com/@isaiah.taylor/use-vs-code-on-a-supercomputer-15e4cbbb1bc2
