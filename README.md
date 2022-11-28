@@ -1,12 +1,38 @@
 
 # VSCode Remote HPC
 
-This script can be used to start a batch job on the cluster and then connect Microsoft VSCode to it. The script is inspired by the blog 
+The purpose of this repository and the two start_vscode.sh scripts is to enable you to run VSCode Remote safely on a worker node using the Sheffield University HPC clusters.
+
+Following the instructions below, you will run some VScode Remote setup tasks on the cluster/s, then from your **local** machine you run the script/s to start a VSCode Remote server within a batch job and connect your local machine to it.
+
+The access to the initiated Microsoft VSCode session on the cluster is made through your local machine's web browser. 
+The script is inspired by the blog
 
 https://medium.com/@isaiah.taylor/use-vs-code-on-a-supercomputer-15e4cbbb1bc2
 
 This version has been forked from the (much appreciated) original at https://gitlab.ethz.ch/sfux/VSCode_remote_HPC
+## Table of contents
+* [Overview of the process](#overview-of-the-process)
+* [Requirements](#requirements)
+  * [General requirements](#general-requirements)
+  * [WSL requirements](#wsl-requirements)
+* [Preparation Steps](#preparation-steps)
+  * [ShARC preparation](#sharc-preparation)
+  * [Bessemer preparation](#bessemer-preparation)
+  * [Initiate code server](#initiate-code-server)
+* [Usage instructions](#usage-instructions)
+  * [Installation on your local machine](#installation-on-your-local-machine)
+  * [Starting VSCode Remote server using a batch job on ShARC](#starting-vscode-remote-server-using-a-batch-job-on-sharc)
+  * [Starting VSCode Remote server using a batch job on Bessemer](#starting-vscode-remote-server-using-a-batch-job-on-bessemer)
+  * [Reconnect to a code-server session](#reconnect-to-a-code-server-session)
+  * [Cleanup after the job](#cleanup-after-the-job)
+* [Main author](#main-author)
+* [Contributions](#contributions)
 
+## Overview of the process
+
+
+![plot](./img/VSCode-server.jpg)
 ## Requirements
 
 ### General requirements
@@ -15,7 +41,7 @@ The script assumes that you have setup SSH keys for passwordless access to the c
 
 https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-22-04
 
-Currently the script should run on Linux (tested on Ubuntu), Mac OS X (untested) and Windows (using WSL/WSL2  which has been tested with Ubuntu or git bash which is untested). 
+Currently the scripts should run on Linux (tested on Ubuntu), Mac OS X (untested) and Windows (using [WSL/WSL2](#wsl-requirements) tested with Ubuntu or git bash (untested). 
 
 When using a Linux computer, please make sure that ```xdg-open``` is available. This package is used to automatically start your default browser. You can install it with the command
 
@@ -44,6 +70,8 @@ or
 ```
 
 ### WSL requirements
+
+To install WSL/WSL2 on Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11 you can follow instructions here: https://learn.microsoft.com/en-us/windows/wsl/install
 
 If using WSL you may also need to set your ```DISPLAY``` variable prior to running the script in order to get X11 GUI forwarding working correctly (for automatic browser opening). e.g.
 
