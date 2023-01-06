@@ -26,6 +26,7 @@ This version has been forked from the (much appreciated) original at https://git
   * [Starting VSCode Remote server using a batch job on Bessemer](#starting-vscode-remote-server-using-a-batch-job-on-bessemer)
   * [Reconnect to a code-server session](#reconnect-to-a-code-server-session)
   * [Cleanup after the job](#cleanup-after-the-job)
+* ## Known issues(#known-issues)
 * [Main author](#main-author)
 * [Contributions](#contributions)
 
@@ -252,8 +253,26 @@ Once a session starts the code-server password is randomly regenerated and the n
 ### Reconnect to a code-server session
 When running the script, it creates a local file called reconnect_info in the installation directory, which contains all information regarding the used ports, the remote ip address, the command for the SSH tunnel and the URL for the browser. This information should be sufficient to reconnect to a code-server session if connection was lost.
 
+1) Try reconnecting by opening the URL in your browser
+
+2) If the connection is not available then copy and paste the command from the 'SSH tunnel' line into the local terminal, then repeat step 1)
+
 ## Cleanup after the job
 Please note that when you finish working with the code-server, you need to terminate on the local machine by pressing the enter key so the script can terminate the job on the cluster as well as stop the SSH tunnel from your local machine.
+
+## Known issues
+
+Currently it is not possible to use the native Settings Sync functionality of VS code with code-server. You may wsih to install this [extension](https://marketplace.visualstudio.com/items?itemName=Shan.code-settings-sync). You can install by typing into the command line 
+
+code-server version
+```
+code-server --install-extension Shan.code-settings-sync
+```
+desktop version 
+```
+code --install-extension Shan.code-settings-sync
+```
+
 
 
 ## Main author
