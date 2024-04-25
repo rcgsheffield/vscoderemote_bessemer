@@ -282,7 +282,7 @@ else
 fi
 
 # set modules
-VSC_MODULE_COMMAND="vscode-server/4.2.0/binary git/2.28.0-GCCcore-10.2.0-nodocs"
+VSC_MODULE_COMMAND="code-server/4.16.1 git/2.39.2-GCCcore-12.2.0-nodocs"
 
 # check if VSC_SSH_KEY_PATH is empty or contains a valid path
 if [ -z "$VSC_SSH_KEY_PATH" ]; then
@@ -338,7 +338,7 @@ SSLCERT=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/vscode_remote_ssl-server-ce
 SSLCERTKEY=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem ] && echo 1 || echo 0")
 
 if [[ "$SSLCERT" == 0 ]] || [[ "$SSLCERTKEY" == 0 ]] ; then
-        echo -e "Missing SSL certificate or key. Exiting! Please 'module load vscode-server/4.2.0/binary' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
+        echo -e "Missing SSL certificate or key. Exiting! Please 'module load code-server/4.16.1' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
         exit 1
 fi
 
