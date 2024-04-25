@@ -17,12 +17,12 @@ This version has been forked from the (much appreciated) original at https://git
   * [General requirements](#general-requirements)
   * [WSL requirements](#wsl-requirements)
 * [Preparation Steps](#preparation-steps)
-  * [ShARC preparation](#sharc-preparation)
+  * [Stanage preparation](#stanage-preparation)
   * [Bessemer preparation](#bessemer-preparation)
   * [Initiate code server](#initiate-code-server)
 * [Usage instructions](#usage-instructions)
   * [Installation on your local machine](#installation-on-your-local-machine)
-  * [Starting VSCode Remote server using a batch job on ShARC](#starting-vscode-remote-server-using-a-batch-job-on-sharc)
+  * [Starting VSCode Remote server using a batch job on Stanage](#starting-vscode-remote-server-using-a-batch-job-on-stanage)
   * [Starting VSCode Remote server using a batch job on Bessemer](#starting-vscode-remote-server-using-a-batch-job-on-bessemer)
   * [Reconnect to a code-server session](#reconnect-to-a-code-server-session)
   * [Cleanup after the job](#cleanup-after-the-job)
@@ -61,8 +61,8 @@ apt-get install xdg-utils binutils ssh
 You can either use the -k option of the script to specify the location of the SSH key, or even better use an SSH config file with the IdentityFile option by adding the following lines in your $HOME/.ssh/config file: 
 
 ```
- Host sharc.shef.ac.uk
- IdentityFile ~/.ssh/id_ed25519_sharc
+ Host stanage.shef.ac.uk
+ IdentityFile ~/.ssh/id_ed25519_stanage
 ```
 or
 ```
@@ -84,19 +84,19 @@ In addition, if you wish to leverage your existing Windows host machine's OpenSS
 
 ## Preparation Steps 
 
-### ShARC preparation (see below for [Bessemer preparation](#bessemer-preparation))
+### Stanage preparation (see below for [Bessemer preparation](#bessemer-preparation))
 
-The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your ShARC account with regards to the code-server.
+The preparation steps only need to be executed once. You need to carry out those steps to set up the basic configuration for your Stanage account with regards to the code-server.
 
-Login to the ShARC cluster and start an interactive job with:
+Login to the Stanage cluster and start an interactive job with:
 
 ```
-qrshx
+srun --pty bash -i
 ```
 Load the modules for one of the code-server installations:
 
 ```
-module load apps/vscode-server/4.2.0/binary
+module load code-server/4.16.1 
 ```
 
 [Jump to step Initiate code-server](#initiate-code-server)
@@ -153,19 +153,19 @@ Download the repository with the command
 git clone git@github.com:rcgsheffield/vscoderemote_sheffield_hpc.git
 ```
 
-### Starting VSCode Remote server using a batch job on ShARC (see below for [Bessemer instructions](#starting-vscode-remote-server-using-a-batch-job-on-bessemer))
+### Starting VSCode Remote server using a batch job on Stanage (see below for [Bessemer instructions](#starting-vscode-remote-server-using-a-batch-job-on-bessemer))
 
-The start_vscode_sharc.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a ShARC worker node. Please find below the list of options that can be used with the script:
+The start_vscode_stanage.sh script needs to be executed on your local computer but will spawn the VS Code remote server on a Stanage worker node. Please find below the list of options that can be used with the script:
 
 ```
-$ ./start_vscode_sharc.sh --help
-./start_vscode_sharc.sh: Script to start a VSCode remote server on ShARC from a local computer
+$ ./start_vscode_stanage.sh --help
+./start_vscode_stanage.sh: Script to start a VSCode remote server on Stanage from a local computer
 
-Usage: start_vscode_sharc.sh [options]
+Usage: start_vscode_stanage.sh [options]
 
 Options:
 
-        -u | --username       USERNAME         TUoS username for SSH connection to ShARC
+        -u | --username       USERNAME         TUoS username for SSH connection to Stanage
         -n | --numcores       NUM_CPU          Number of CPU cores to be used on the cluster
         -W | --runtime        RUN_TIME         Run time limit for the code-server in hours and minutes HH:MM
         -m | --memory         MEM_PER_CORE     Memory limit in MB per core
@@ -181,19 +181,19 @@ Optional arguments:
 
 Examples:
 
-        ./start_vscode_sharc.sh -u te1st -n 4 -W 04:00:00 -m 2048
+        ./start_vscode_stanage.sh -u te1st -n 4 -W 04:00:00 -m 16384
 
-        ./start_vscode_sharc.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 2048
+        ./start_vscode_stanage.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 8192
 
-        ./start_vscode_sharc.sh -c /home/te1st/.vsc_config
+        ./start_vscode_stanage.sh -c $HOME/.vsc_config
 
 Format of configuration file:
 
-VSC_USERNAME=""             # TUoS username for SSH connection to ShARC
+VSC_USERNAME=""             # TUoS username for SSH connection to Stanage
 VSC_NUM_CPU=1               # Number of CPU cores to be used on the cluster
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
-VSC_MEM_PER_CPU_CORE=1024   # Memory limit in MB per core
+VSC_MEM_PER_CPU_CORE=4096   # Memory limit in MB per core
 VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
 VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 ```
