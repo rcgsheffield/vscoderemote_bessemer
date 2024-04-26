@@ -211,7 +211,7 @@ fi
 
 # check number of CPU per task
 
-# check if VSC_CPUS_PER_TASK
+# check if VSC_CPUS_PER_TASK is an integer
 if ! [[ "$VSC_CPUS_PER_TASK" =~ ^[0-9c]+$ ]]; then 
         echo -e "\n Error: $VSC_CPUS_PER_TASK -> Incorrect format. Please specify number of tasks per node as an integer and try again\n"
         display_help
