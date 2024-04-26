@@ -168,7 +168,7 @@ Options:
         -u | --username       USERNAME         TUoS username for SSH connection to Stanage
         -n | --numcores       NUM_CPU          Number of CPU cores to be used on the cluster
         -W | --runtime        RUN_TIME         Run time limit for the code-server in hours and minutes HH:MM
-        -m | --memory         MEM_PER_CORE     Memory limit in MB per core
+	-m | --memory         MEM_PER_NODE     Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
 
 Optional arguments:
 
@@ -181,9 +181,9 @@ Optional arguments:
 
 Examples:
 
-        ./start_vscode_stanage.sh -u te1st -n 4 -W 04:00:00 -m 16384
+        ./start_vscode_stanage.sh -u te1st -n 4 -W 04:00:00 -m 16
 
-        ./start_vscode_stanage.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 8192
+        ./start_vscode_stanage.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 8 
 
         ./start_vscode_stanage.sh -c $HOME/.vsc_config
 
@@ -193,7 +193,7 @@ VSC_USERNAME=""             # TUoS username for SSH connection to Stanage
 VSC_NUM_CPU=1               # Number of CPU cores to be used on the cluster
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
-VSC_MEM_PER_CPU_CORE=4096   # Memory limit in MB per core
+VSC_MEM_PER_CPU_CORE=4      # Memory limit in GB per core
 VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
 VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 ```

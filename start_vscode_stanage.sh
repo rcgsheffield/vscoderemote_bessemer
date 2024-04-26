@@ -47,7 +47,7 @@ VSC_CPUS_PER_TASK=1
 # Runtime limit default         : 1:00 hour
 VSC_RUN_TIME="01:00:00"
 
-# Memory default                : 2 GB per node
+# Memory default                : 4 GB per node
 VSC_MEM_PER_NODE=4
 
 # Numberof GPUs default        : nodePUs
@@ -75,7 +75,7 @@ Usage: start_vscode_stanage.sh [options]
 
 Options:
 
-        -u | --username       USERNAME                  TUoS username for SSH connection to Bessemer
+        -u | --username       USERNAME                  TUoS username for SSH connection to Stanage
         -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM
         -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
         -m | --memory         MEM_PER_NODE              Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
@@ -84,7 +84,7 @@ Optional arguments:
 
         -c | --config         CONFIG_FILE               Configuration file for specifying options
         -g | --numgpu         NUM_GPU                   Number of GPUs to be used on the cluster
-        -p | --partition      PARTITION_ID              Partition ID to be used (gpu or gpu-a100-tmp)
+        -p | --partition      PARTITION_ID              Partition ID to be used (gpu or gpu-h100)
         -h | --help                                     Display help for this script and quit
         -i | --interval       INTERVAL                  Time interval for checking if the job on the cluster already started
         -k | --key            SSH_KEY_PATH              Path to SSH key with non-standard name
@@ -100,7 +100,7 @@ Examples:
 
 Format of configuration file:
 
-VSC_USERNAME=""             # TUoS username for SSH connection to Bessemer
+VSC_USERNAME=""             # TUoS username for SSH connection to Stanage
 VSC_CPUS_PER_TASK=1         # Number of cpu cores per task
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
