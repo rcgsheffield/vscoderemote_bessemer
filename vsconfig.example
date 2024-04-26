@@ -2,6 +2,6 @@ VSC_USERNAME=""             # TUoS username for SSH connection to Stanage
 VSC_NUM_CPU=1               # Number of CPU cores to be used on the cluster
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
-VSC_MEM_PER_CPU_CORE=4      # Memory limit in GB per core
+VSC_MEM_PER_NODE=4          # Memory limit in GB per core
 VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
 VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
