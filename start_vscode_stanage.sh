@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#  Script to run on a local computer to start a code-server on Bessemer and      #
+#  Script to run on a local computer to start a code-server on Stanage and    #
 #  connect it with a local browser to it                                      #
 #                                                                             #
 #  Main author    : Samuel Fux                                                #
@@ -14,7 +14,7 @@
 #                                                                             #
 #  28.10.2021    Initial version of the script based on Jupyter script        #
 #  Forked and edited for TUoS by J.Moore                                      #
-#  Edited for use with Bessemer for TUoS by C.D.Kennedy                       #
+#  Edited for use with Stanage for TUoS by C.D.Kennedy                        #
 ###############################################################################
 
 ###############################################################################
@@ -50,7 +50,7 @@ VSC_RUN_TIME="01:00:00"
 # Memory default                : 4 GB per node
 VSC_MEM_PER_NODE=4
 
-# Numberof GPUs default        : nodePUs
+# Number of GPUs default        : 0 GPUs
 VSC_NUM_GPU=0
 
 # Partition ID default        : gpu
@@ -69,7 +69,7 @@ VSC_SSH_KEY_PATH=""
 function display_help {
 cat <<-EOF
 
-$0: Script to start a VSCode remote server on Bessemer from a local computer
+$0: Script to start a VSCode remote server on Stanage from a local computer
 
 Usage: start_vscode_stanage.sh [options]
 
@@ -104,7 +104,7 @@ VSC_USERNAME=""             # TUoS username for SSH connection to Stanage
 VSC_CPUS_PER_TASK=1         # Number of cpu cores per task
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
-VSC_MEM_PER_NODE=2          # Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16
+VSC_MEM_PER_NODE=4          # Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16
 VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
 VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 
@@ -182,6 +182,16 @@ done
 # Check configuration options                                                 #
 ###############################################################################
 
+$MAX_CPUS=64
+
+if [ "$VSC_NUM_GPU" -gt 0 ]; then
+        MAX_CPUS=48	
+	if [ "VSC_PARTITION_ID" = "gpu"	]; then
+		GPU_NAME="A100"; MAX_GPU=4
+	else  
+		GPU_NAME="H100"; MAX_GPU=2
+	fi	
+fi
 # check if user has a configuration file and source it to initialize options
 if [ -f "$VSC_CONFIG_FILE" ]; then
         echo -e "Found configuration file $VSC_CONFIG_FILE"
@@ -207,9 +217,9 @@ if ! [[ "$VSC_CPUS_PER_TASK" =~ ^[0-9c]+$ ]]; then
         display_help
 fi
 
-# check if VSC_CPUS_PER_TASK is <= 64
-if [ "$VSC_CPUS_PER_TASK" -gt "64" ]; then
-        echo -e "\n Error: $VSC_CPUS_PER_TASK -> Larger than 40. No distributed memory supported, therefore the number of cpus per task needs to be smaller or equal to 40\n"
+# check if VSC_CPUS_PER_TASK is <= $MAX_CPUS
+if [ "$VSC_CPUS_PER_TASK" -gt "$MAX_CPUS" ]; then
+        echo -e "\n Error: $VSC_CPUS_PER_TASK -> Larger than $MAX_CPUS. No distributed memory supported, therefore the number of cpus per task needs to be smaller or equal to $MAX_CPUS\n"
         display_help
 fi
 
@@ -225,22 +235,22 @@ if ! [[ "$VSC_NUM_GPU" =~ ^[0-9]+$ ]]; then
         display_help
 fi
 
-# check if VSC_NUM_GPU is <= 4
-if [ "$VSC_NUM_GPU" -gt "4" ]; then
-        echo -e "\n Error: No distributed memory supported, therefore number of GPUs needs to be smaller or equal to 4\n"
-        display_help
+# check if VSC_NUM_GPU is <= $MAX_GPUS
+if [ "$VSC_NUM_GPU" -gt "$MAX_GPUS" ]; then
+	echo -e "\n Error: No distributed memory supported, therefore number of $GPU_NAME GPUs needs to be smaller or equal to $MAX_GPUS\n"
+	display_help
 fi
-
+	
 if [ "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Requesting $VSC_NUM_GPU GPUs for running the code-server"
-        VSC_SNUM_GPU="--gpus-per-node=$VSC_NUM_GPU"
+        VSC_SNUM_GPU="--gres=gpu:$VSC_NUM_GPU"
 else
         VSC_SNUM_GPU=""
 fi
 
 # check if VSC_PARTITION_ID is set
-if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] || [ "$VSC_PARTITION_ID" == "gpu-a100-tmp" ] ); then
-        echo -e "\n Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
+if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] || [ "$VSC_PARTITION_ID" == "gpu-h100" ] ); then
+        echo -e "\n Error: partition incorrect. Please specify either gpu or gpu-h100"
         display_help
 elif [ "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Requesting partition $VSC_PARTITION_ID"
@@ -282,7 +292,7 @@ else
 fi
 
 # set modules
-VSC_MODULE_COMMAND="code-server/4.16.1 git/2.39.2-GCCcore-12.2.0-nodocs"
+VSC_MODULE_COMMAND="code-server git"
 
 # check if VSC_SSH_KEY_PATH is empty or contains a valid path
 if [ -z "$VSC_SSH_KEY_PATH" ]; then
@@ -338,7 +348,7 @@ SSLCERT=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/vscode_remote_ssl-server-ce
 SSLCERTKEY=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem ] && echo 1 || echo 0")
 
 if [[ "$SSLCERT" == 0 ]] || [[ "$SSLCERTKEY" == 0 ]] ; then
-        echo -e "Missing SSL certificate or key. Exiting! Please 'module load code-server/4.16.1' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
+        echo -e "Missing SSL certificate or key. Exiting! Please 'module load code-server' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
         exit 1
 fi
 
@@ -352,7 +362,7 @@ VSCPASS=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 30 | tr -d '\n'
 # This is being done this way for reasons.
 ssh -T $VSC_SSH_OPT "sed -i '/^password:/d' ~/.config/code-server/config.yaml && echo 'password: $VSCPASS' > ~/.config/code-server/config.yaml"
 
-# run the code-server job on Bessemer and save the ip of the compute node in the file vscip in the home directory of the user on Bessemer
+# run the code-server job on Stanage and save the ip of the compute node in the file vscip in the home directory of the user on Stanage
 echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
@@ -385,7 +395,7 @@ ENDSSH
 # give the code-server a few seconds to start
 sleep 7
 
-# get remote ip, port and token from files stored on Bessemer
+# get remote ip, port and token from files stored on Stanage
 echo -e "Receiving ip, port and token from the code-server"
 VSC_REMOTE_IP=$(ssh $VSC_SSH_OPT "cat /users/$VSC_USERNAME/vscip | grep -m1 'Remote IP' | cut -d ':' -f 2")
 VSC_REMOTE_PORT=$(ssh $VSC_SSH_OPT "cat /users/$VSC_USERNAME/vscport | grep -m1 'Remote PORT' | cut -d ':' -f 2")
@@ -479,6 +489,6 @@ read -p "Please press enter to end the session, disconnect the SSH tunnel and te
 # Kill the tunnel
 kill $SSH_TUNNEL_PID
 
-# Terminate the job on Bessemer and remove the vscjid file.
+# Terminate the job on Stanage and remove the vscjid file.
 ssh -T $VSC_SSH_OPT "scancel $VSC_REMOTE_JID && rm /users/$VSC_USERNAME/vscjid /users/$VSC_USERNAME/vscip /users/$VSC_USERNAME/vscport"
 exit
