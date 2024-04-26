@@ -84,7 +84,7 @@ Optional arguments:
 
         -c | --config         CONFIG_FILE               Configuration file for specifying options
         -g | --numgpu         NUM_GPU                   Number of GPUs to be used on the cluster
-        -p | --partition      PARTITION_ID              Partition ID to be used (gpu or gpu-a100-tmp)
+	-p | --partition      PARTITION_ID              Partition ID to be used (gpu) 
         -h | --help                                     Display help for this script and quit
         -i | --interval       INTERVAL                  Time interval for checking if the job on the cluster already started
         -k | --key            SSH_KEY_PATH              Path to SSH key with non-standard name
@@ -201,7 +201,7 @@ fi
 
 # check number of CPU per task
 
-# check if VSC_CPUS_PER_TASK
+# check if VSC_CPUS_PER_TASK is an interger
 if ! [[ "$VSC_CPUS_PER_TASK" =~ ^[0-9c]+$ ]]; then 
         echo -e "\n Error: $VSC_CPUS_PER_TASK -> Incorrect format. Please specify number of tasks per node as an integer and try again\n"
         display_help
@@ -239,8 +239,8 @@ else
 fi
 
 # check if VSC_PARTITION_ID is set
-if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] || [ "$VSC_PARTITION_ID" == "gpu-a100-tmp" ] ); then
-        echo -e "\n Error: partition incorrect. Please specify either gpu or gpu-a100-tmp"
+if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] ); then
+        echo -e "\n Error: partition incorrect. Please specify gpu "
         display_help
 elif [ "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Requesting partition $VSC_PARTITION_ID"
@@ -282,7 +282,7 @@ else
 fi
 
 # set modules
-VSC_MODULE_COMMAND="vscode-server/4.2.0/binary git/2.28.0-GCCcore-10.2.0-nodocs"
+VSC_MODULE_COMMAND="code-server git"
 
 # check if VSC_SSH_KEY_PATH is empty or contains a valid path
 if [ -z "$VSC_SSH_KEY_PATH" ]; then
@@ -338,7 +338,7 @@ SSLCERT=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/vscode_remote_ssl-server-ce
 SSLCERTKEY=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem ] && echo 1 || echo 0")
 
 if [[ "$SSLCERT" == 0 ]] || [[ "$SSLCERTKEY" == 0 ]] ; then
-        echo -e "Missing SSL certificate or key. Exiting! Please 'module load vscode-server/4.2.0/binary' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
+        echo -e "Missing SSL certificate or key. Exiting! Please 'module load code-server' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
         exit 1
 fi
 
@@ -372,7 +372,7 @@ echo "Remote JOB ID:\$SLURM_JOB_ID" > /home/$VSC_USERNAME/vscjid
 code-server --cert ~/.ssl/vscoderemote/vscode_remote_ssl-server-cert.pem --cert-key ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem --bind-addr=\${VSC_IP_REMOTE}:\${VSC_PORT_REMOTE}
 ENDSBATCH
 
-# wait until batch job has started, poll every $VSC_WAITING_INTERVAL seconds to check if /cluster/home/$VSC_USERNAME/vscip exists
+# wait until batch job has started, poll every $VSC_WAITING_INTERVAL seconds to check if /home/$VSC_USERNAME/vscip exists
 # once the file exists and is not empty the batch job has started
 ssh $VSC_SSH_OPT <<ENDSSH
 while ! [ -e /home/$VSC_USERNAME/vscip -a -s /home/$VSC_USERNAME/vscip ]; do
