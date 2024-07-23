@@ -135,7 +135,7 @@ This will setup the local configuration (including a password for you) and store
 
 After the server has fully started, terminate it by pressing Ctrl+C .
 
-Now you should generate your SSL certificates (these secure the communications between your local device and the endpoint worker node running the vscode server.)
+Now you should generate your SSL certificates by downloading [setup_ssl_ca_server_client.sh](./setup_ssl_ca_server_client.sh) in this repository and running the script on the cluster (these secure the communications between your local device and the endpoint worker node running the vscode server.)
 
 ```
 setup_ssl_ca_server_client.sh
@@ -167,7 +167,7 @@ Options:
 
         -u | --username       USERNAME         TUoS username for SSH connection to Stanage
         -n | --numcores       NUM_CPU          Number of CPU cores to be used on the cluster
-        -W | --runtime        RUN_TIME         Run time limit for the code-server in hours and minutes HH:MM
+        -W | --runtime        RUN_TIME         Run time limit for the code-server in hours and minutes HH:MM:SS
 	-m | --memory         MEM_PER_NODE     Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
 
 Optional arguments:
@@ -215,7 +215,7 @@ Usage: start_vscode_bessemer.sh [options]
 Options:
 
         -u | --username       USERNAME                  TUoS username for SSH connection to Bessemer
-        -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM
+        -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM:SS
         -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
         -m | --memory         MEM_PER_NODE              Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
 
