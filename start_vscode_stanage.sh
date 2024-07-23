@@ -76,7 +76,7 @@ Usage: start_vscode_stanage.sh [options]
 Options:
 
         -u | --username       USERNAME                  TUoS username for SSH connection to Stanage
-        -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM
+        -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM:SS
         -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
         -m | --memory         MEM_PER_NODE              Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
 
