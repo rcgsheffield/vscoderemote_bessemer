@@ -135,7 +135,7 @@ This will setup the local configuration (including a password for you) and store
 
 After the server has fully started, terminate it by pressing Ctrl+C .
 
-Now you should generate your SSL certificates by downloading [setup_ssl_ca_server_client.sh](./setup_ssl_ca_server_client.sh) in this repository and running the script on the cluster (these secure the communications between your local device and the endpoint worker node running the vscode server.)
+Now you should generate your SSL certificates (these secure the communications between your local device and the endpoint worker node running the vscode server.)
 
 ```
 setup_ssl_ca_server_client.sh
