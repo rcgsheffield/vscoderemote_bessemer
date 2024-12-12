@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#  Script to run on a local computer to start a code-server on ShARC and      #
+#  Script to run on a local computer to start a code-server on Stanage and    #
 #  connect it with a local browser to it                                      #
 #                                                                             #
 #  Main author    : Samuel Fux                                                #
@@ -14,6 +14,7 @@
 #                                                                             #
 #  28.10.2021    Initial version of the script based on Jupyter script        #
 #  Forked and edited for TUoS by J.Moore                                      #
+#  Edited for use with Stanage for TUoS by C.D.Kennedy                        #
 ###############################################################################
 
 ###############################################################################
@@ -27,7 +28,7 @@ VSC_VERSION="0.1"
 VSC_SCRIPTDIR=$(pwd)
 
 # hostname of the cluster to connect to
-VSC_HOSTNAME="sharc.shef.ac.uk"
+VSC_HOSTNAME="stanage.shef.ac.uk"
 
 # order for initializing configuration options
 # 1. Defaults values set inside this script
@@ -40,17 +41,20 @@ VSC_CONFIG_FILE="$HOME/.vsc_config"
 # Username default              : no default
 VSC_USERNAME=""
 
-# Number of CPU cores default   : 1 CPU core
-VSC_NUM_CPU=1
+# Number of cpus per tasks default : 1 task per node
+VSC_CPUS_PER_TASK=1
 
 # Runtime limit default         : 1:00 hour
 VSC_RUN_TIME="01:00:00"
 
-# Memory default                : 1024 MB per core
-VSC_MEM_PER_CPU_CORE=1024
+# Memory default                : 4 GB per node
+VSC_MEM_PER_NODE=4
 
 # Number of GPUs default        : 0 GPUs
 VSC_NUM_GPU=0
+
+# Partition ID default        : gpu
+VSC_PARTITION_ID="gpu"
 
 # Waiting interval default      : 30 seconds
 VSC_WAITING_INTERVAL=30
@@ -64,41 +68,43 @@ VSC_SSH_KEY_PATH=""
 
 function display_help {
 cat <<-EOF
-$0: Script to start a VSCode remote server on ShARC from a local computer
 
-Usage: start_vscode.sh [options]
+$0: Script to start a VSCode remote server on Stanage from a local computer
+
+Usage: start_vscode_stanage.sh [options]
 
 Options:
 
-        -u | --username       USERNAME         TUoS username for SSH connection to ShARC
-        -n | --numcores       NUM_CPU          Number of CPU cores to be used on the cluster
-        -W | --runtime        RUN_TIME         Run time limit for the code-server in hours and minutes HH:MM
-        -m | --memory         MEM_PER_CORE     Memory limit in MB per core
+        -u | --username       USERNAME                  TUoS username for SSH connection to Stanage
+        -W | --runtime        RUN_TIME                  Run time limit for the code-server in hours and minutes HH:MM:SS
+        -n | --numcpus        NUM_CPUS_PER_TASK         Number of CPU cores per task     
+        -m | --memory         MEM_PER_NODE              Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16 
 
 Optional arguments:
 
-        -c | --config         CONFIG_FILE      Configuration file for specifying options
-        -g | --numgpu         NUM_GPU          Number of GPUs to be used on the cluster
-        -h | --help                            Display help for this script and quit
-        -i | --interval       INTERVAL         Time interval for checking if the job on the cluster already started
-        -k | --key            SSH_KEY_PATH     Path to SSH key with non-standard name
-        -v | --version                         Display version of the script and exit
+        -c | --config         CONFIG_FILE               Configuration file for specifying options
+        -g | --numgpu         NUM_GPU                   Number of GPUs to be used on the cluster
+        -p | --partition      PARTITION_ID              Partition ID to be used (gpu or gpu-h100)
+        -h | --help                                     Display help for this script and quit
+        -i | --interval       INTERVAL                  Time interval for checking if the job on the cluster already started
+        -k | --key            SSH_KEY_PATH              Path to SSH key with non-standard name
+        -v | --version                                  Display version of the script and exit
 
 Examples:
 
-        ./start_vscode.sh -u te1st -n 4 -W 04:00:00 -m 2048
+        ./start_vscode_stanage.sh -u te1st -n 4 -W 04:00:00 -m 16
 
-        ./start_vscode.sh --username te1st --numcores 2 --runtime 01:30:00 --memory 2048
+        ./start_vscode_stanage.sh --username te1st --numcpus 2 --runtime 01:30:00 --memory 8
 
-        ./start_vscode.sh -c $HOME/.vsc_config
+        ./start_vscode_stanage.sh -c $HOME/.vsc_config
 
 Format of configuration file:
 
-VSC_USERNAME=""             # TUoS username for SSH connection to ShARC
-VSC_NUM_CPU=1               # Number of CPU cores to be used on the cluster
+VSC_USERNAME=""             # TUoS username for SSH connection to Stanage
+VSC_CPUS_PER_TASK=1         # Number of cpu cores per task
 VSC_NUM_GPU=0               # Number of GPUs to be used on the cluster
 VSC_RUN_TIME="01:00:00"     # Run time limit for the code-server in hours and minutes HH:MM:SS
-VSC_MEM_PER_CPU_CORE=1024   # Memory limit in MB per core
+VSC_MEM_PER_NODE=4          # Memory limit in GB per node. (RAM) Ex. 4 cores *4G = 16
 VSC_WAITING_INTERVAL=60     # Time interval to check if the job on the cluster already started
 VSC_SSH_KEY_PATH=""         # Path to SSH key with non-standard name
 
@@ -117,7 +123,7 @@ do
                 display_help
                 ;;
                 -v|--version)
-                echo -e "start_vscode.sh version: $VSC_VERSION\n"
+                echo -e "start_vscode_stanage.sh version: $VSC_VERSION\n"
                 exit
                 ;;
                 -u|--username)
@@ -125,8 +131,8 @@ do
                 shift
                 shift
                 ;;
-                -n|--numcores)
-                VSC_NUM_CPU=$2
+                -n|--numcpus)
+                VSC_CPUS_PER_TASK=$2
                 shift
                 shift
                 ;;
@@ -136,7 +142,7 @@ do
                 shift
                 ;;
                 -m|--memory)
-                VSC_MEM_PER_CPU_CORE=$2
+                VSC_MEM_PER_NODE=$2
                 shift
                 shift
                 ;;
@@ -147,6 +153,11 @@ do
                 ;;
                 -g|--numgpu)
                 VSC_NUM_GPU=$2
+                shift
+                shift
+                ;;
+                -p|--partition)
+                VSC_PARTITION_ID=$2
                 shift
                 shift
                 ;;
@@ -171,6 +182,16 @@ done
 # Check configuration options                                                 #
 ###############################################################################
 
+$MAX_CPUS=64
+
+if [ "$VSC_NUM_GPU" -gt 0 ]; then
+        MAX_CPUS=48	
+	if [ "VSC_PARTITION_ID" = "gpu"	]; then
+		GPU_NAME="A100"; MAX_GPU=4
+	else  
+		GPU_NAME="H100"; MAX_GPU=2
+	fi	
+fi
 # check if user has a configuration file and source it to initialize options
 if [ -f "$VSC_CONFIG_FILE" ]; then
         echo -e "Found configuration file $VSC_CONFIG_FILE"
@@ -182,70 +203,84 @@ fi
 # check that VSC_USERNAME is not an empty string
 if [ -z "$VSC_USERNAME" ]
 then
-        echo -e "Error: No TUoS username is specified, terminating script\n"
+        echo -e "\n Error: No TUoS username is specified, terminating script\n"
         display_help
 else
         echo -e "TUoS username: $VSC_USERNAME"
 fi
 
-# check number of CPU cores
+# check number of CPU per task
 
-# check if VSC_NUM_CPU an integer
-if ! [[ "$VSC_NUM_CPU" =~ ^[0-9]+$ ]]; then
-        echo -e "Error: $VSC_NUM_CPU -> Incorrect format. Please specify number of CPU cores as an integer and try again\n"
+# check if VSC_CPUS_PER_TASK is an integer
+if ! [[ "$VSC_CPUS_PER_TASK" =~ ^[0-9c]+$ ]]; then 
+        echo -e "\n Error: $VSC_CPUS_PER_TASK -> Incorrect format. Please specify number of tasks per node as an integer and try again\n"
         display_help
 fi
 
-# check if VSC_NUM_CPU is <= 16
-if [ "$VSC_NUM_CPU" -gt "16" ]; then
-        echo -e "Error: $VSC_NUM_CPU -> Larger than 16. No distributed memory supported, therefore the number of CPU cores needs to be smaller or equal to 16\n"
+# check if VSC_CPUS_PER_TASK is <= $MAX_CPUS
+if [ "$VSC_CPUS_PER_TASK" -gt "$MAX_CPUS" ]; then
+        echo -e "\n Error: $VSC_CPUS_PER_TASK -> Larger than $MAX_CPUS. No distributed memory supported, therefore the number of cpus per task needs to be smaller or equal to $MAX_CPUS\n"
         display_help
 fi
 
-if [ "$VSC_NUM_CPU" -gt "0" ]; then
-        echo -e "Requesting $VSC_NUM_CPU CPU cores for running the code-server"
+if [ "$VSC_CPUS_PER_TASK" -gt "0" ]; then
+        echo -e "Requesting $VSC_CPUS_PER_TASK cpus per task for running the code-server"
 fi
 
 # check number of GPUs
 
 # check if VSC_NUM_GPU an integer
 if ! [[ "$VSC_NUM_GPU" =~ ^[0-9]+$ ]]; then
-        echo -e "Error: $VSC_NUM_GPU -> Incorrect format. Please specify the number of GPU as an integer and try again\n"
+        echo -e "\n Error: $VSC_NUM_GPU -> Incorrect format. Please specify the number of GPU as an integer and try again\n"
         display_help
 fi
 
-# check if VSC_NUM_GPU is <= 7
-if [ "$VSC_NUM_GPU" -gt "7" ]; then
-        echo -e "Error: No distributed memory supported, therefore number of GPUs needs to be smaller or equal to 7\n"
-        display_help
+# check if VSC_NUM_GPU is <= $MAX_GPUS
+if [ "$VSC_NUM_GPU" -gt "$MAX_GPUS" ]; then
+	echo -e "\n Error: No distributed memory supported, therefore number of $GPU_NAME GPUs needs to be smaller or equal to $MAX_GPUS\n"
+	display_help
 fi
-
+	
 if [ "$VSC_NUM_GPU" -gt "0" ]; then
         echo -e "Requesting $VSC_NUM_GPU GPUs for running the code-server"
-        VSC_SNUM_GPU="-l gpu=$VSC_NUM_GPU"
+        VSC_SNUM_GPU="--gres=gpu:$VSC_NUM_GPU"
 else
         VSC_SNUM_GPU=""
 fi
 
-if [ ! "$VSC_NUM_CPU" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
-        echo -e "Error: No CPU and no GPU resources requested, terminating script"
+# check if VSC_PARTITION_ID is set
+if [ "$VSC_NUM_GPU" -gt "0" ] && ! ( [ "$VSC_PARTITION_ID" == "gpu" ] || [ "$VSC_PARTITION_ID" == "gpu-h100" ] ); then
+        echo -e "\n Error: partition incorrect. Please specify either gpu or gpu-h100"
+        display_help
+elif [ "$VSC_NUM_GPU" -gt "0" ]; then
+        echo -e "Requesting partition $VSC_PARTITION_ID"
+        VSC_SNUM_GPU="--partition=$VSC_PARTITION_ID --qos=gpu $VSC_SNUM_GPU"  
+fi
+
+if [ ! "$VSC_CPUS_PER_TASK" -gt "0" -a ! "$VSC_NUM_GPU" -gt "0" ]; then
+        echo -e "\n Error: No CPU and no GPU resources requested, terminating script"
+        display_help
+fi
+
+if [ "$VSC_NUM_GPU" -gt "0" -a ! "$VSC_CPUS_PER_TASK" -gt "0" ]; then
+        echo -e "\n Error: No CPU resource requested whilst GPU resources are requested, terminating script"
         display_help
 fi
 
 # check if VSC_RUN_TIME is provided in HH:MM:SS format
 if ! [[ "$VSC_RUN_TIME" =~ ^[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$ ]]; then
-        echo -e "Error: $VSC_RUN_TIME -> Incorrect format. Please specify runtime limit in the format HH:MM:SS and try again\n"
+        echo -e "\n Error: $VSC_RUN_TIME -> Incorrect format. Please specify runtime limit in the format HH:MM:SS and try again\n"
         display_help
 else
     echo -e "Run time limit set to $VSC_RUN_TIME"
 fi
 
-# check if VSC_MEM_PER_CPU_CORE is an integer
-if ! [[ "$VSC_MEM_PER_CPU_CORE" =~ ^[0-9]+$ ]]; then
-        echo -e "Error: $VSC_MEM_PER_CPU_CORE -> Memory limit must be an integer, please try again\n"
+# check if VSC_MEM_PER_NODE is an integer
+if ! [[ "$VSC_MEM_PER_NODE" =~ ^[0-9]+ ]]; then
+        echo -e "\n Error: $VSC_MEM_PER_NODE -> Memory lmit must be an integer, please try again\n"
         display_help
 else
-    echo -e "Memory per core set to $VSC_MEM_PER_CPU_CORE MB"
+    echo -e "Memory per node set to $VSC_MEM_PER_NODE GB"
 fi
 
 # check if VSC_WAITING_INTERVAL is an integer
@@ -257,7 +292,7 @@ else
 fi
 
 # set modules
-VSC_MODULE_COMMAND="apps/vscode-server/4.2.0/binary dev/git/2.35.2/gcc-4.9.4"
+VSC_MODULE_COMMAND="code-server git"
 
 # check if VSC_SSH_KEY_PATH is empty or contains a valid path
 if [ -z "$VSC_SSH_KEY_PATH" ]; then
@@ -285,23 +320,23 @@ fi
 
 # check for log files from a previous session in the home directory of the cluster
 ssh -T $VSC_SSH_OPT <<ENDSSHIP
-if [ -f /home/$VSC_USERNAME/vscip ]; then
+if [ -f /users/$VSC_USERNAME/vscip ]; then
         echo -e "Found old vscip file, deleting it ..."
-        rm /home/$VSC_USERNAME/vscip
+        rm /users/$VSC_USERNAME/vscip
 fi
 ENDSSHIP
 
 ssh -T $VSC_SSH_OPT <<ENDSSHPORT
-if [ -f /home/$VSC_USERNAME/vscport ]; then
+if [ -f /users/$VSC_USERNAME/vscport ]; then
         echo -e "Found old vscport file, deleting it ..."
-        rm /home/$VSC_USERNAME/vscport
+        rm /users/$VSC_USERNAME/vscport
 fi
 ENDSSHPORT
 
 VSCJIDPRESENT=$(ssh $VSC_SSH_OPT "[ -e ~/vscjid ] && echo 1 || echo 0")
 
 if [[ "$VSCJIDPRESENT" == 1 ]] ; then
-        echo -e "Found old vscjid file, are you already running a session?  Remove /home/$VSC_USERNAME/vscjid if you are sure this is not a duplicate session and re-run script. Exiting!"
+        echo -e "Found old vscjid file, are you already running a session?  Remove /users/$VSC_USERNAME/vscjid if you are sure this is not a duplicate session and re-run script. Exiting!"
         exit 1
 fi
 
@@ -313,7 +348,7 @@ SSLCERT=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/vscode_remote_ssl-server-ce
 SSLCERTKEY=$(ssh $VSC_SSH_OPT "[ -e ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem ] && echo 1 || echo 0")
 
 if [[ "$SSLCERT" == 0 ]] || [[ "$SSLCERTKEY" == 0 ]] ; then
-        echo -e "Missing SSL certificate or key. Exiting! Please 'module load apps/vscode-server/4.2.0/binary' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
+        echo -e "Missing SSL certificate or key. Exiting! Please 'module load code-server' and run SSL setup step 'setup_ssl_ca_server_client.sh' first! "
         exit 1
 fi
 
@@ -327,29 +362,30 @@ VSCPASS=$(strings /dev/urandom | grep -o '[[:alnum:]]' | head -n 30 | tr -d '\n'
 # This is being done this way for reasons.
 ssh -T $VSC_SSH_OPT "sed -i '/^password:/d' ~/.config/code-server/config.yaml && echo 'password: $VSCPASS' > ~/.config/code-server/config.yaml"
 
-# run the code-server job on ShARC and save the ip of the compute node in the file vscip in the home directory of the user on ShARC
+# run the code-server job on Stanage and save the ip of the compute node in the file vscip in the home directory of the user on Stanage
 echo -e "Connecting to $VSC_HOSTNAME to start the code-server in a batch job"
 # FIXME: save jobid in a variable, that the script can kill the batch job at the end
 echo -e "Connection command:"
-echo -e "============================================================================================"
-echo -e "ssh ${VSC_SSH_OPT} qsub -V -N VSCodeServer  -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU}"
-echo -e "============================================================================================\n"
-ssh ${VSC_SSH_OPT} qsub -V -N VSCodeServer  -pe smp ${VSC_NUM_CPU} -l h_rt=${VSC_RUN_TIME} -l rmem=${VSC_MEM_PER_CPU_CORE}M ${VSC_SNUM_GPU} <<ENDQSUB
-source \${HOME}/.bashrc
+echo -e "==================================================================================="
+echo -e "ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} -time=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNUM_GPU}"
+echo -e "================================================================================\n"
+ssh ${VSC_SSH_OPT} sbatch -J VSCodeServer --export=ALL --cpus-per-task=${VSC_CPUS_PER_TASK} --time=${VSC_RUN_TIME} --mem=${VSC_MEM_PER_NODE}G ${VSC_SNUM_GPU} << ENDSBATCH
+#!/bin/sh
+source "\${HOME}/.bashrc"
 module load $VSC_MODULE_COMMAND
 export XDG_RUNTIME_DIR="\$HOME/vsc_runtime"
 VSC_IP_REMOTE="\$(hostname)"
 VSC_PORT_REMOTE=$(comm -23 <(seq 49152 65535 | sort) <(ss -Htan | awk '{print $4}' | cut -d':' -f2 | sort -u) | shuf | head -n 1)
-echo "Remote IP:\$VSC_IP_REMOTE" > /home/$VSC_USERNAME/vscip
-echo "Remote PORT:\$VSC_PORT_REMOTE" > /home/$VSC_USERNAME/vscport
-echo "Remote JOB ID:\$JOB_ID" > /home/$VSC_USERNAME/vscjid
+echo "Remote IP:\$VSC_IP_REMOTE" > /users/$VSC_USERNAME/vscip
+echo "Remote PORT:\$VSC_PORT_REMOTE" > /users/$VSC_USERNAME/vscport
+echo "Remote JOB ID:\$SLURM_JOB_ID" > /users/$VSC_USERNAME/vscjid
 code-server --cert ~/.ssl/vscoderemote/vscode_remote_ssl-server-cert.pem --cert-key ~/.ssl/vscoderemote/private/vscode_remote_ssl-server-key.pem --bind-addr=\${VSC_IP_REMOTE}:\${VSC_PORT_REMOTE}
-ENDQSUB
+ENDSBATCH
 
-# wait until batch job has started, poll every $VSC_WAITING_INTERVAL seconds to check if /cluster/home/$VSC_USERNAME/vscip exists
+# wait until batch job has started, poll every $VSC_WAITING_INTERVAL seconds to check if /users/$VSC_USERNAME/vscip exists
 # once the file exists and is not empty the batch job has started
 ssh $VSC_SSH_OPT <<ENDSSH
-while ! [ -e /home/$VSC_USERNAME/vscip -a -s /home/$VSC_USERNAME/vscip ]; do
+while ! [ -e /users/$VSC_USERNAME/vscip -a -s /users/$VSC_USERNAME/vscip ]; do
         echo 'Waiting for code-server to start, sleep for $VSC_WAITING_INTERVAL sec'
         sleep $VSC_WAITING_INTERVAL
 done
@@ -359,17 +395,17 @@ ENDSSH
 # give the code-server a few seconds to start
 sleep 7
 
-# get remote ip, port and token from files stored on ShARC
+# get remote ip, port and token from files stored on Stanage
 echo -e "Receiving ip, port and token from the code-server"
-VSC_REMOTE_IP=$(ssh $VSC_SSH_OPT "cat /home/$VSC_USERNAME/vscip | grep -m1 'Remote IP' | cut -d ':' -f 2")
-VSC_REMOTE_PORT=$(ssh $VSC_SSH_OPT "cat /home/$VSC_USERNAME/vscport | grep -m1 'Remote PORT' | cut -d ':' -f 2")
-VSC_REMOTE_JID=$(ssh $VSC_SSH_OPT "cat /home/$VSC_USERNAME/vscjid | grep -m1 'Remote JOB ID' | cut -d ':' -f 2")
+VSC_REMOTE_IP=$(ssh $VSC_SSH_OPT "cat /users/$VSC_USERNAME/vscip | grep -m1 'Remote IP' | cut -d ':' -f 2")
+VSC_REMOTE_PORT=$(ssh $VSC_SSH_OPT "cat /users/$VSC_USERNAME/vscport | grep -m1 'Remote PORT' | cut -d ':' -f 2")
+VSC_REMOTE_JID=$(ssh $VSC_SSH_OPT "cat /users/$VSC_USERNAME/vscjid | grep -m1 'Remote JOB ID' | cut -d ':' -f 2")
 
 # check if the IP, the port and the token are defined
 if  [[ "$VSC_REMOTE_IP" == "" ]]; then
 cat <<EOF
 Error: remote ip is not defined. Terminating script.
-* Please check login to the cluster and check with qstat if the batch job on the cluster is running and terminate it with qdel.
+* Please login to the cluster and check with squeue if the batch job on the cluster is running and terminate it with scancel.
 EOF
 exit 1
 fi
@@ -453,6 +489,6 @@ read -p "Please press enter to end the session, disconnect the SSH tunnel and te
 # Kill the tunnel
 kill $SSH_TUNNEL_PID
 
-# Terminate the job on ShARC and remove the vscjid file.
-ssh -T $VSC_SSH_OPT "qdel $VSC_REMOTE_JID && rm /home/$VSC_USERNAME/vscjid /home/$VSC_USERNAME/vscip /home/$VSC_USERNAME/vscport"
+# Terminate the job on Stanage and remove the vscjid file.
+ssh -T $VSC_SSH_OPT "scancel $VSC_REMOTE_JID && rm /users/$VSC_USERNAME/vscjid /users/$VSC_USERNAME/vscip /users/$VSC_USERNAME/vscport"
 exit
